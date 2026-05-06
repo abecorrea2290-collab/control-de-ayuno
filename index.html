@@ -6,7 +6,6 @@
 <meta name="theme-color" content="#0d0f0e" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="description" content="Tracker de ayuno intermitente con fases metabólicas y seguimiento de peso" />
 <title>Control de Ayuno</title>
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icon.svg" />
@@ -49,7 +48,7 @@ try { firebase.initializeApp(firebaseConfig); } catch(e) {}
   --mono:       'DM Mono', monospace;
   --sans:       'Syne', sans-serif;
   --radius:     10px;
-  --sidebar:    200px;
+  --sidebar:    204px;
 }
 
 html, body { height: 100%; }
@@ -57,52 +56,30 @@ body { background: var(--bg); color: var(--text); font-family: var(--sans); }
 button { background: none; border: none; cursor: pointer; font-family: var(--sans); }
 .hidden { display: none !important; }
 
-/* ══════════════════════════════
-   LOADING
-══════════════════════════════ */
+/* ── Loading ── */
 #screen-loading {
-  display: flex; align-items: center; justify-content: center;
-  height: 100vh;
+  display: flex; align-items: center; justify-content: center; height: 100vh;
 }
 .loading-dot {
   width: 10px; height: 10px; border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 1.4s ease-in-out infinite;
+  background: var(--accent); animation: pulse 1.4s ease-in-out infinite;
 }
 
-/* ══════════════════════════════
-   LOGIN
-══════════════════════════════ */
+/* ── Login ── */
 #screen-login {
   display: flex; align-items: center; justify-content: center;
   min-height: 100vh; padding: 2rem 1rem;
 }
-
 .login-wrap { width: 100%; max-width: 360px; text-align: center; }
-
-.login-brand {
-  display: flex; align-items: center; justify-content: center;
-  gap: 10px; margin-bottom: 5px;
-}
-
-.login-name { font-family: var(--sans); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-
-.login-sub {
-  font-family: var(--mono); font-size: 10px; color: var(--muted);
-  letter-spacing: 0.08em; margin-bottom: 2.5rem;
-}
-
-.login-card {
-  background: var(--surface); border: 0.5px solid var(--border2);
-  border-radius: 14px; padding: 2rem 1.5rem;
-}
-
-.login-desc { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+.login-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; }
+.login-name  { font-family: var(--sans); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.login-sub   { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 2.5rem; }
+.login-card  { background: var(--surface); border: 0.5px solid var(--border2); border-radius: 14px; padding: 2rem 1.5rem; }
+.login-desc  { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
 
 .btn-google {
-  width: 100%; padding: 13px 16px;
-  background: #fff; color: #1f1f1f; border: none; border-radius: 8px;
-  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  width: 100%; padding: 13px 16px; background: #fff; color: #1f1f1f;
+  border-radius: 8px; font-family: var(--sans); font-size: 14px; font-weight: 600;
   display: flex; align-items: center; justify-content: center; gap: 10px;
   transition: opacity 0.15s, transform 0.1s;
 }
@@ -110,9 +87,7 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
 .btn-google:active { transform: scale(0.98); }
 .btn-google:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ══════════════════════════════
-   APP LAYOUT
-══════════════════════════════ */
+/* ── App layout ── */
 #screen-app { display: flex; min-height: 100vh; }
 
 /* ── Sidebar ── */
@@ -120,261 +95,190 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
   width: var(--sidebar); min-height: 100vh;
   background: var(--surface); border-right: 0.5px solid var(--border2);
   position: fixed; left: 0; top: 0; bottom: 0;
-  display: flex; flex-direction: column;
-  z-index: 200; transition: transform 0.25s ease;
+  display: flex; flex-direction: column; z-index: 200;
+  transition: transform 0.25s ease;
 }
 
-.sidebar-brand {
-  padding: 1.25rem 1rem 1.1rem;
-  border-bottom: 0.5px solid var(--border);
-}
-
-.brand-row { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
-
-.logo-dot {
-  width: 9px; height: 9px; border-radius: 50%;
-  background: var(--accent); flex-shrink: 0;
-  animation: pulse 2s ease-in-out infinite;
-}
-
+.sidebar-brand { padding: 1.25rem 1rem 1.1rem; border-bottom: 0.5px solid var(--border); }
+.brand-row  { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+.logo-dot   { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); flex-shrink: 0; animation: pulse 2s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
-
-.brand-name { font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+.brand-name { font-family: var(--sans); font-size: 13px; font-weight: 700; }
 .brand-sub  { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.07em; margin-left: 17px; }
 
-/* ── Nav ── */
-.sidebar-nav {
-  flex: 1; padding: 0.75rem 0.6rem;
-  display: flex; flex-direction: column; gap: 2px;
-}
+.sidebar-nav { flex: 1; padding: 0.75rem 0.6rem; display: flex; flex-direction: column; gap: 2px; }
 
 .nav-section-label {
   font-family: var(--mono); font-size: 9px; color: var(--muted);
-  letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 6px 10px 4px; margin-top: 4px;
+  letter-spacing: 0.1em; text-transform: uppercase; padding: 6px 10px 4px; margin-top: 4px;
 }
 
 .nav-item {
   display: flex; align-items: center; gap: 9px;
   padding: 8px 10px; border-radius: 7px;
-  font-family: var(--mono); font-size: 12px;
-  color: var(--muted); letter-spacing: 0.02em;
-  transition: all 0.18s; text-align: left; width: 100%;
+  font-family: var(--mono); font-size: 12px; color: var(--muted);
+  letter-spacing: 0.02em; transition: all 0.18s; text-align: left; width: 100%;
 }
 .nav-item:hover { color: var(--text); background: var(--surface2); }
 .nav-item.active { color: var(--accent); background: var(--accent-dim); }
 .nav-item.active .nav-dot { background: var(--accent); }
-
-.nav-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--muted); flex-shrink: 0;
-  transition: background 0.18s;
-}
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background 0.18s; }
 .nav-item:hover .nav-dot { background: var(--text); }
 
-/* ── User ── */
-.sidebar-user {
-  padding: 0.85rem 1rem;
-  border-top: 0.5px solid var(--border);
+/* live indicator in sidebar */
+.nav-live-badge {
+  margin-left: auto; background: rgba(163,230,53,0.15);
+  color: var(--accent); font-family: var(--mono); font-size: 9px;
+  padding: 2px 6px; border-radius: 99px; letter-spacing: 0.04em;
+  animation: pulse 2s ease-in-out infinite;
 }
 
+.sidebar-user { padding: 0.85rem 1rem; border-top: 0.5px solid var(--border); }
 .user-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-
-.avatar {
-  width: 26px; height: 26px; border-radius: 50%;
-  object-fit: cover; background: var(--surface2);
-  border: 1px solid var(--border2); flex-shrink: 0;
-}
-
-.user-name {
-  font-family: var(--mono); font-size: 11px; color: var(--muted);
-  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-
-.btn-signout {
-  width: 100%; padding: 6px;
-  font-family: var(--mono); font-size: 10px; color: var(--muted);
-  border: 0.5px solid var(--border); border-radius: 6px;
-  letter-spacing: 0.04em; transition: all 0.15s;
-}
+.avatar   { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; background: var(--surface2); border: 1px solid var(--border2); flex-shrink: 0; }
+.user-name { font-family: var(--mono); font-size: 11px; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn-signout { width: 100%; padding: 6px; font-family: var(--mono); font-size: 10px; color: var(--muted); border: 0.5px solid var(--border); border-radius: 6px; letter-spacing: 0.04em; transition: all 0.15s; }
 .btn-signout:hover { color: var(--coral); border-color: rgba(251,113,133,0.4); }
 
-/* ── Sidebar overlay (mobile) ── */
-.sidebar-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.65); z-index: 199;
-}
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 199; }
 
 /* ── Main ── */
-.main {
-  margin-left: var(--sidebar);
-  flex: 1; padding: 2rem 1.5rem;
-  display: flex; justify-content: center;
-  min-height: 100vh;
-}
-
+.main { margin-left: var(--sidebar); flex: 1; padding: 2rem 1.5rem; display: flex; justify-content: center; min-height: 100vh; }
 .content { width: 100%; max-width: 580px; }
 
 /* ── Mobile bar ── */
 .mobile-bar {
-  display: none; position: fixed;
-  top: 0; left: 0; right: 0; height: 50px;
+  display: none; position: fixed; top: 0; left: 0; right: 0; height: 50px;
   background: var(--surface); border-bottom: 0.5px solid var(--border2);
   align-items: center; padding: 0 1rem; gap: 10px; z-index: 198;
 }
-
-.hamburger {
-  width: 34px; height: 34px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 5px;
-}
-.hamburger span {
-  display: block; width: 18px; height: 1.5px;
-  background: var(--text); border-radius: 2px;
-}
-
+.hamburger { width: 34px; height: 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+.hamburger span { display: block; width: 18px; height: 1.5px; background: var(--text); border-radius: 2px; }
 .mobile-title { font-family: var(--sans); font-size: 14px; font-weight: 700; }
 
-/* ── Page title ── */
+/* ── Page header ── */
 .page-header { margin-bottom: 1.5rem; }
-.page-title { font-family: var(--sans); font-size: 18px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 3px; }
-.page-sub   { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.07em; }
+.page-title  { font-family: var(--sans); font-size: 18px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 3px; }
+.page-sub    { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.07em; }
 
-/* ══════════════════════════════
-   COMPONENTS
-══════════════════════════════ */
-.card {
-  background: var(--surface); border: 0.5px solid var(--border2);
-  border-radius: var(--radius); padding: 1.25rem; margin-bottom: 12px;
-}
+/* ── Cards ── */
+.card { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 12px; }
+.section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
 
-.section-label {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
-  color: var(--muted); text-transform: uppercase; margin-bottom: 14px;
-}
-
-/* Inputs */
+/* ── Fields ── */
 .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .input-full { grid-column: 1 / -1; }
-
-.field label {
-  display: block; font-family: var(--mono); font-size: 11px;
-  color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;
-}
-
-.field input {
-  width: 100%; background: var(--surface2); border: 0.5px solid var(--border2);
-  border-radius: 8px; padding: 10px 12px; font-family: var(--mono);
-  font-size: 14px; color: var(--text); outline: none;
-  transition: border-color 0.2s; color-scheme: dark;
-}
+.field label { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em; }
+.field input { width: 100%; background: var(--surface2); border: 0.5px solid var(--border2); border-radius: 8px; padding: 10px 12px; font-family: var(--mono); font-size: 14px; color: var(--text); outline: none; transition: border-color 0.2s; color-scheme: dark; }
 .field input:focus { border-color: var(--accent); }
 
-/* Buttons */
-.btn-primary {
-  width: 100%; padding: 13px; background: var(--accent); color: #0d0f0e;
-  border-radius: 8px; font-family: var(--sans); font-size: 14px;
-  font-weight: 700; letter-spacing: 0.02em; display: block;
-  transition: opacity 0.15s, transform 0.1s;
-}
+/* ── Buttons ── */
+.btn-primary { width: 100%; padding: 13px; background: var(--accent); color: #0d0f0e; border-radius: 8px; font-family: var(--sans); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; display: block; transition: opacity 0.15s, transform 0.1s; }
 .btn-primary:hover { opacity: 0.9; }
 .btn-primary:active { transform: scale(0.98); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-lunch {
-  width: 100%; padding: 12px 16px; margin-top: 10px;
+  width: 100%; padding: 13px 16px; margin-top: 10px;
   background: var(--surface2); color: var(--text);
   border: 0.5px solid var(--border2); border-radius: 8px;
-  font-family: var(--sans); font-size: 13px; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  letter-spacing: 0.01em; transition: all 0.15s;
+  font-family: var(--sans); font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  transition: all 0.15s;
 }
 .btn-lunch:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 .btn-lunch:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.btn-ghost {
-  padding: 4px 9px; color: var(--muted);
-  border: 0.5px solid var(--border); border-radius: 6px;
-  font-family: var(--mono); font-size: 11px;
-  transition: all 0.15s; flex-shrink: 0;
-}
+.btn-ghost { padding: 4px 9px; color: var(--muted); border: 0.5px solid var(--border); border-radius: 6px; font-family: var(--mono); font-size: 11px; transition: all 0.15s; flex-shrink: 0; }
 .btn-ghost:hover { color: var(--coral); border-color: rgba(251,113,133,0.4); }
 
-/* Metrics */
-.metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
+.btn-text { font-family: var(--mono); font-size: 11px; color: var(--muted); text-decoration: underline; padding: 4px; transition: color 0.15s; }
+.btn-text:hover { color: var(--coral); }
 
-.metric {
-  background: var(--surface); border: 0.5px solid var(--border);
-  border-radius: var(--radius); padding: 1rem;
+/* ── Live tracker card ── */
+.live-card {
+  background: var(--surface); border: 0.5px solid var(--border2);
+  border-radius: var(--radius); padding: 1.25rem; margin-bottom: 12px;
 }
 
+.live-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  color: var(--accent); text-transform: uppercase; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.live-tag-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); animation: pulse 1.5s ease-in-out infinite;
+}
+
+.live-since { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+
+.live-counters { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.live-counter-block { }
+
+.live-big {
+  font-family: var(--mono); font-size: 36px; font-weight: 500;
+  color: var(--accent); line-height: 1; letter-spacing: -0.02em;
+}
+
+.live-big.muted-val { color: var(--teal); }
+
+.live-unit { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 4px; letter-spacing: 0.04em; }
+
+.live-divider { width: 0.5px; background: var(--border2); }
+
+/* ── Metrics ── */
+.metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
+.metric  { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1rem; }
 .metric-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
 .metric-val   { font-family: var(--mono); font-size: 20px; font-weight: 500; line-height: 1; }
 .metric-sub   { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
 
-/* Phase card */
+/* ── Phase card ── */
 .phase-card { border-radius: var(--radius); padding: 1.25rem; margin-bottom: 12px; border: 0.5px solid; }
-
 .phase-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
-.phase-icon   { font-size: 28px; flex-shrink: 0; }
-.phase-name   { font-family: var(--sans); font-size: 16px; font-weight: 700; margin-bottom: 2px; }
-.phase-range  { font-family: var(--mono); font-size: 11px; opacity: 0.7; }
-.phase-desc   { font-size: 13px; line-height: 1.6; opacity: 0.85; }
-
+.phase-icon  { font-size: 28px; flex-shrink: 0; }
+.phase-name  { font-family: var(--sans); font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.phase-range { font-family: var(--mono); font-size: 11px; opacity: 0.7; }
+.phase-desc  { font-size: 13px; line-height: 1.6; opacity: 0.85; }
 .progress-wrap { height: 4px; border-radius: 99px; background: rgba(255,255,255,0.08); margin: 12px 0 4px; overflow: hidden; }
-.progress-bar  { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+.progress-bar  { height: 100%; border-radius: 99px; transition: width 1s linear; }
 .progress-labels { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; opacity: 0.45; }
 
-/* Water */
-.water-bar {
-  background: var(--surface); border: 0.5px solid var(--border);
-  border-radius: var(--radius); padding: 0.9rem 1.25rem;
-  margin-bottom: 12px; display: flex; align-items: center;
-  gap: 10px; font-size: 13px; color: var(--muted);
-}
+/* ── Water ── */
+.water-bar { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 0.9rem 1.25rem; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
 .water-bar strong { color: var(--teal); font-family: var(--mono); }
 
-/* Timeline */
-.timeline-card {
-  background: var(--surface); border: 0.5px solid var(--border2);
-  border-radius: var(--radius); overflow: hidden; margin-bottom: 12px;
-}
-
-.tl-header {
-  padding: 10px 1.25rem; border-bottom: 0.5px solid var(--border);
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
-  color: var(--muted); text-transform: uppercase;
-}
-
-.tl-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 9px 1.25rem; border-bottom: 0.5px solid var(--border);
-  font-size: 13px; transition: background 0.15s;
-}
+/* ── Timeline ── */
+.timeline-card { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+.tl-header { padding: 10px 1.25rem; border-bottom: 0.5px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+.tl-row { display: flex; align-items: center; gap: 12px; padding: 9px 1.25rem; border-bottom: 0.5px solid var(--border); font-size: 13px; transition: background 0.15s; }
 .tl-row:last-child { border-bottom: none; }
 .tl-row.active { background: rgba(163,230,53,0.04); }
 .tl-row.past   { opacity: 0.3; }
-
 .tl-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .tl-h    { font-family: var(--mono); font-size: 11px; color: var(--muted); min-width: 58px; }
 .tl-name { flex: 1; font-size: 12px; }
-
 .badge { font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 99px; }
 .badge-now  { background: rgba(163,230,53,0.13); color: var(--accent); }
-.badge-proj { background: rgba(45,212,191,0.13);  color: var(--teal); }
+.badge-proj { background: rgba(45,212,191,0.13); color: var(--teal); }
 
-/* History */
-.hist-empty {
-  text-align: center; padding: 3rem 1rem;
-  font-family: var(--mono); font-size: 12px;
-  color: var(--muted); letter-spacing: 0.06em; line-height: 2;
-}
+/* ── History ── */
+.hist-empty { text-align: center; padding: 3rem 1rem; font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: 0.06em; line-height: 2; }
 
-.hist-card {
-  background: var(--surface); border: 0.5px solid var(--border2);
-  border-radius: var(--radius); padding: 0.9rem 1.1rem;
-  margin-bottom: 10px; border-left-width: 2.5px; border-left-style: solid;
-}
+/* Phase stats */
+.phase-stats { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+.phase-stat-row { display: flex; align-items: center; gap: 10px; padding: 9px 1.25rem; border-bottom: 0.5px solid var(--border); }
+.phase-stat-row:last-child { border-bottom: none; }
+.phase-stat-icon { font-size: 18px; flex-shrink: 0; }
+.phase-stat-name { font-family: var(--mono); font-size: 11px; color: var(--muted); flex: 1; }
+.phase-stat-bar-wrap { width: 80px; height: 4px; border-radius: 99px; background: rgba(255,255,255,0.07); overflow: hidden; }
+.phase-stat-bar     { height: 100%; border-radius: 99px; }
+.phase-stat-count   { font-family: var(--mono); font-size: 12px; color: var(--text); min-width: 30px; text-align: right; }
 
+.hist-card { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 0.9rem 1.1rem; margin-bottom: 10px; border-left-width: 2.5px; border-left-style: solid; }
 .hist-header { display: flex; align-items: center; gap: 10px; }
 .hist-icon   { font-size: 22px; flex-shrink: 0; }
 .hist-info   { flex: 1; }
@@ -383,30 +287,17 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
 .hist-hours  { text-align: right; margin-right: 8px; }
 .hist-h-val  { font-family: var(--mono); font-size: 17px; font-weight: 500; line-height: 1; }
 .hist-h-sub  { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+.hist-proj   { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 7px; padding-top: 7px; border-top: 0.5px solid var(--border); }
+.hist-teal   { color: var(--teal); }
 
-.hist-proj {
-  font-family: var(--mono); font-size: 11px; color: var(--muted);
-  margin-top: 7px; padding-top: 7px; border-top: 0.5px solid var(--border);
-}
-.hist-teal { color: var(--teal); }
-
-/* Weight */
+/* ── Weight ── */
 .w-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; }
-
-.w-stat {
-  background: var(--surface); border: 0.5px solid var(--border);
-  border-radius: var(--radius); padding: 0.8rem;
-}
+.w-stat  { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 0.8rem; }
 .w-stat-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
 .w-stat-val   { font-family: var(--mono); font-size: 14px; font-weight: 500; line-height: 1; }
-
-.chart-wrap { position: relative; height: 200px; }
-
-.w-entry {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 1.25rem; border-bottom: 0.5px solid var(--border); font-size: 13px;
-}
-.w-entry:last-child { border-bottom: none; }
+.chart-wrap   { position: relative; height: 200px; }
+.w-entry      { display: flex; align-items: center; gap: 10px; padding: 9px 1.25rem; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+.w-entry:last-child  { border-bottom: none; }
 .w-entry-val   { font-family: var(--mono); font-size: 14px; font-weight: 500; min-width: 66px; }
 .w-entry-date  { font-family: var(--mono); font-size: 11px; color: var(--muted); flex: 1; }
 .w-entry-delta { font-family: var(--mono); font-size: 11px; min-width: 52px; text-align: right; }
@@ -414,21 +305,19 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
 .delta-pos { color: var(--coral); }
 .delta-neu { color: var(--muted); }
 
-/* Install button */
+/* ── Install ── */
 .install-btn {
   position: fixed; bottom: 1.25rem; right: 1.25rem;
-  background: var(--accent); color: #0d0f0e;
-  border-radius: 99px; padding: 10px 18px;
+  background: var(--accent); color: #0d0f0e; border-radius: 99px; padding: 10px 18px;
   font-family: var(--sans); font-size: 13px; font-weight: 700;
   display: none; align-items: center; gap: 7px;
-  box-shadow: 0 4px 20px rgba(163,230,53,0.25);
+  box-shadow: 0 4px 20px rgba(163,230,53,0.2);
   transition: opacity 0.15s, transform 0.1s; z-index: 300;
 }
 .install-btn.visible { display: flex; }
 .install-btn:hover { opacity: 0.9; }
-.install-btn:active { transform: scale(0.97); }
 
-/* Toast */
+/* ── Toast ── */
 .toast {
   position: fixed; bottom: 24px; left: 50%;
   transform: translateX(-50%) translateY(70px);
@@ -440,37 +329,25 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
-/* Spinner */
-.spin {
-  display: inline-block; width: 14px; height: 14px;
-  border: 2px solid rgba(163,230,53,0.25);
-  border-top-color: var(--accent); border-radius: 50%;
-  animation: spin 0.7s linear infinite; vertical-align: middle;
-}
+/* ── Spinner ── */
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(163,230,53,0.25); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ══════════════════════════════
-   RESPONSIVE
-══════════════════════════════ */
+/* ── Responsive ── */
 @media (max-width: 700px) {
   .sidebar { transform: translateX(-100%); }
   .sidebar.is-open { transform: translateX(0); }
   .sidebar-overlay.is-open { display: block; }
   .main { margin-left: 0; padding: 5rem 1rem 2rem; }
   .mobile-bar { display: flex; }
-  .metrics { grid-template-columns: repeat(3,1fr); }
-  .w-stats  { grid-template-columns: repeat(2,1fr); }
-  .install-btn { bottom: 1rem; right: 1rem; }
+  .w-stats { grid-template-columns: repeat(2,1fr); }
+  .live-big { font-size: 28px; }
 }
-
-@media (min-width: 701px) {
-  .mobile-bar { display: none !important; }
-}
+@media (min-width: 701px) { .mobile-bar { display: none !important; } }
 </style>
 </head>
 <body>
 
-<!-- Loading -->
 <div id="screen-loading"><div class="loading-dot"></div></div>
 
 <!-- Login -->
@@ -494,7 +371,6 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
 <!-- App -->
 <div id="screen-app" class="hidden" style="display:none">
 
-  <!-- Mobile top bar -->
   <div class="mobile-bar">
     <button class="hamburger" onclick="toggleSidebar()">
       <span></span><span></span><span></span>
@@ -502,10 +378,8 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
     <span class="mobile-title" id="mobileTitle">Tracker</span>
   </div>
 
-  <!-- Sidebar overlay -->
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-row">
@@ -517,20 +391,15 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
 
     <nav class="sidebar-nav">
       <div class="nav-section-label">Módulos</div>
-
       <button class="nav-item active" id="nav-tracker" onclick="switchTab('tracker',this,'Tracker')">
-        <div class="nav-dot"></div>
-        ⏱ Tracker
+        <div class="nav-dot"></div>⏱ Tracker
+        <span class="nav-live-badge hidden" id="navLiveBadge">EN CURSO</span>
       </button>
-
       <button class="nav-item" id="nav-history" onclick="switchTab('history',this,'Historial')">
-        <div class="nav-dot"></div>
-        📋 Historial
+        <div class="nav-dot"></div>📋 Historial
       </button>
-
       <button class="nav-item" id="nav-weight" onclick="switchTab('weight',this,'Peso')">
-        <div class="nav-dot"></div>
-        ⚖ Peso
+        <div class="nav-dot"></div>⚖ Peso
       </button>
     </nav>
 
@@ -543,7 +412,6 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
     </div>
   </aside>
 
-  <!-- Main -->
   <main class="main">
     <div class="content">
 
@@ -551,48 +419,50 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
       <div id="tab-tracker" class="tab-pane active">
         <div class="page-header">
           <div class="page-title">Tracker de ayuno</div>
-          <div class="page-sub">CALCULA TU FASE METABÓLICA ACTUAL</div>
+          <div class="page-sub">SEGUIMIENTO EN TIEMPO REAL</div>
         </div>
 
-        <div class="card">
-          <div class="section-label">◈ Ingresar horas</div>
-          <div class="input-grid">
-            <div class="field input-full">
-              <label>◆ Última comida</label>
+        <!-- Forma inicial -->
+        <div id="tracker-form">
+          <div class="card">
+            <div class="section-label">◈ Registrar última comida</div>
+            <div class="field" style="margin-bottom:12px">
+              <label>◆ ¿Cuándo fue tu última comida?</label>
               <input type="datetime-local" id="lastMeal" />
             </div>
-            <div class="field input-full">
-              <label>◆ Hora actual</label>
-              <input type="datetime-local" id="currentTime" />
-            </div>
-            <div class="field input-full">
+            <div class="field" style="margin-bottom:16px">
               <label>◆ Almuerzo proyectado (opcional)</label>
               <input type="datetime-local" id="projectedMeal" />
             </div>
+            <button class="btn-primary" onclick="iniciarSeguimiento()">
+              ▶ Iniciar seguimiento
+            </button>
           </div>
-          <button class="btn-primary" onclick="calcular()">Calcular ayuno</button>
         </div>
 
-        <div id="resultado" class="hidden">
+        <!-- Live tracking -->
+        <div id="tracker-live" class="hidden">
 
-          <div class="metrics">
-            <div class="metric">
-              <div class="metric-label">Actual</div>
-              <div class="metric-val" id="horasActuales">—</div>
-              <div class="metric-sub">horas ayuno</div>
+          <!-- Contador en vivo -->
+          <div class="live-card">
+            <div class="live-tag">
+              <div class="live-tag-dot"></div>
+              Ayuno en curso
             </div>
-            <div class="metric">
-              <div class="metric-label">Proyectado</div>
-              <div class="metric-val" id="horasProyectadas">—</div>
-              <div class="metric-sub">total ayuno</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Restante</div>
-              <div class="metric-val" id="horasRestantes">—</div>
-              <div class="metric-sub">para almorzar</div>
+            <div class="live-since">Desde <span id="liveSince">—</span></div>
+            <div class="live-counters">
+              <div class="live-counter-block">
+                <div class="live-big" id="liveElapsed">0h 00min</div>
+                <div class="live-unit">transcurridas</div>
+              </div>
+              <div id="liveRemBlock" class="live-counter-block hidden">
+                <div class="live-big muted-val" id="liveRemaining">—</div>
+                <div class="live-unit">para almuerzo</div>
+              </div>
             </div>
           </div>
 
+          <!-- Fase actual (auto-actualiza) -->
           <div id="phaseCard" class="phase-card">
             <div class="phase-header">
               <div class="phase-icon" id="phaseIcon"></div>
@@ -606,6 +476,7 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
             <div class="progress-labels"><span id="progressStart"></span><span id="progressEnd"></span></div>
           </div>
 
+          <!-- Fase proyectada -->
           <div id="projPhaseCard" class="phase-card hidden" style="border-style:dashed">
             <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--teal);text-transform:uppercase;margin-bottom:10px;">
               ◆ Fase al completar · <span id="projTotalLabel" style="color:var(--teal)"></span> totales
@@ -622,21 +493,26 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
             <div class="progress-labels"><span id="projProgressStart"></span><span id="projProgressEnd"></span></div>
           </div>
 
+          <!-- Agua -->
           <div class="water-bar">
             <span>◆</span><span id="waterTip"></span>
           </div>
 
+          <!-- Timeline -->
           <div class="timeline-card">
             <div class="tl-header">Línea de fases</div>
             <div id="timeline"></div>
           </div>
 
-          <!-- REGISTRO DE ALMUERZO -->
-          <button id="saveBtn" class="btn-lunch" onclick="guardarRegistro()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg>
-            Registro de almuerzo
+          <!-- Botón registro de almuerzo -->
+          <button id="lunchBtn" class="btn-lunch" onclick="registrarAlmuerzo()">
+            🍽️ &nbsp;Registro de almuerzo
           </button>
 
+          <!-- Resetear -->
+          <div style="text-align:center;margin-top:12px">
+            <button class="btn-text" onclick="resetTracker()">Cambiar última comida</button>
+          </div>
         </div>
       </div>
 
@@ -644,7 +520,7 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
       <div id="tab-history" class="tab-pane hidden">
         <div class="page-header">
           <div class="page-title">Historial de ayuno</div>
-          <div class="page-sub">TODOS TUS REGISTROS</div>
+          <div class="page-sub">ESTADÍSTICAS Y REGISTROS</div>
         </div>
 
         <div class="metrics">
@@ -662,6 +538,14 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
             <div class="metric-label">Máximo</div>
             <div class="metric-val" id="histMax">—</div>
             <div class="metric-sub">horas</div>
+          </div>
+        </div>
+
+        <!-- Estadística de fases -->
+        <div id="phaseStatsWrap" class="hidden">
+          <div class="phase-stats">
+            <div class="tl-header">Fases alcanzadas</div>
+            <div id="phaseStatsList"></div>
           </div>
         </div>
 
@@ -714,11 +598,10 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
         </div>
       </div>
 
-    </div><!-- .content -->
+    </div>
   </main>
-</div><!-- #screen-app -->
+</div>
 
-<!-- PWA install -->
 <button class="install-btn" id="installBtn" onclick="installPwa()">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v13M7 11l5 5 5-5"/><path d="M3 19h18"/></svg>
   Instalar app
@@ -729,23 +612,33 @@ button { background: none; border: none; cursor: pointer; font-family: var(--san
 <script>
 /* ─── PHASES ─── */
 const PHASES = [
-  { min:0,  max:2,   name:'Digestión activa',        icon:'🍽️', desc:'El cuerpo absorbe nutrientes. La glucosa e insulina están elevadas.',                                                bg:'rgba(39,80,10,0.25)',   border:'#3B6D11', text:'#a3e46c', bar:'#639922', dot:'#639922' },
-  { min:2,  max:4,   name:'Bajada de glucosa',        icon:'📉', desc:'La glucosa vuelve a niveles basales. El hígado empieza a liberar glucógeno almacenado.',                            bg:'rgba(39,80,10,0.20)',   border:'#3B6D11', text:'#a3e46c', bar:'#639922', dot:'#639922' },
-  { min:4,  max:8,   name:'Glucogenólisis',           icon:'🔥', desc:'El hígado convierte glucógeno en glucosa. El cuerpo quema algo de grasa. Insulina baja.',                          bg:'rgba(133,79,11,0.25)',  border:'#854F0B', text:'#f6c270', bar:'#BA7517', dot:'#BA7517' },
-  { min:8,  max:12,  name:'Agotamiento de glucógeno', icon:'💧', desc:'Las reservas hepáticas se agotan. Se intensifica la lipólisis. Aparece hambre marcada.',                           bg:'rgba(133,79,11,0.25)',  border:'#854F0B', text:'#f6c270', bar:'#BA7517', dot:'#BA7517' },
+  { min:0,  max:2,   name:'Digestión activa',        icon:'🍽️', desc:'El cuerpo absorbe nutrientes. La glucosa e insulina están elevadas.',                                               bg:'rgba(39,80,10,0.25)',   border:'#3B6D11', text:'#a3e46c', bar:'#639922', dot:'#639922' },
+  { min:2,  max:4,   name:'Bajada de glucosa',        icon:'📉', desc:'La glucosa vuelve a niveles basales. El hígado empieza a liberar glucógeno almacenado.',                           bg:'rgba(39,80,10,0.20)',   border:'#3B6D11', text:'#a3e46c', bar:'#639922', dot:'#639922' },
+  { min:4,  max:8,   name:'Glucogenólisis',           icon:'🔥', desc:'El hígado convierte glucógeno en glucosa. El cuerpo quema algo de grasa. Insulina baja.',                         bg:'rgba(133,79,11,0.25)',  border:'#854F0B', text:'#f6c270', bar:'#BA7517', dot:'#BA7517' },
+  { min:8,  max:12,  name:'Agotamiento de glucógeno', icon:'💧', desc:'Las reservas hepáticas se agotan. Se intensifica la lipólisis. Aparece hambre marcada.',                          bg:'rgba(133,79,11,0.25)',  border:'#854F0B', text:'#f6c270', bar:'#BA7517', dot:'#BA7517' },
   { min:12, max:16,  name:'Cetosis leve + autofagia', icon:'♻️', desc:'El hígado produce cuerpos cetónicos. El cerebro usa cetonas. Inicio de autofagia celular. Clave del 16:8.',        bg:'rgba(186,117,23,0.20)', border:'#EF9F27', text:'#fbbf24', bar:'#EF9F27', dot:'#EF9F27' },
-  { min:16, max:24,  name:'Cetosis moderada',         icon:'✨', desc:'Cetonas dominan como combustible. Autofagia activa. La hormona de crecimiento (GH) sube para proteger músculo.',   bg:'rgba(153,60,29,0.25)',  border:'#993C1D', text:'#fb8c7a', bar:'#D85A30', dot:'#D85A30' },
-  { min:24, max:48,  name:'Cetosis alta',             icon:'📈', desc:'El cerebro obtiene hasta 70% de energía de cetonas. Autofagia máxima. Requiere supervisión médica.',               bg:'rgba(163,45,45,0.25)',  border:'#A32D2D', text:'#fc9898', bar:'#E24B4A', dot:'#E24B4A' },
-  { min:48, max:999, name:'Ayuno extendido',          icon:'🏥', desc:'Adaptación profunda. Insulina mínima. Regeneración celular intensa. Solo bajo supervisión clínica.',              bg:'rgba(163,45,45,0.30)',  border:'#791F1F', text:'#fca5a5', bar:'#E24B4A', dot:'#E24B4A' },
+  { min:16, max:24,  name:'Cetosis moderada',         icon:'✨', desc:'Cetonas dominan como combustible. Autofagia activa. La hormona de crecimiento (GH) sube para proteger músculo.',  bg:'rgba(153,60,29,0.25)',  border:'#993C1D', text:'#fb8c7a', bar:'#D85A30', dot:'#D85A30' },
+  { min:24, max:48,  name:'Cetosis alta',             icon:'📈', desc:'El cerebro obtiene hasta 70% de energía de cetonas. Autofagia máxima. Requiere supervisión médica.',              bg:'rgba(163,45,45,0.25)',  border:'#A32D2D', text:'#fc9898', bar:'#E24B4A', dot:'#E24B4A' },
+  { min:48, max:999, name:'Ayuno extendido',          icon:'🏥', desc:'Adaptación profunda. Insulina mínima. Regeneración celular intensa. Solo bajo supervisión clínica.',             bg:'rgba(163,45,45,0.30)',  border:'#791F1F', text:'#fca5a5', bar:'#E24B4A', dot:'#E24B4A' },
 ];
 
 /* ─── HELPERS ─── */
 const toMs     = v => new Date(v).getTime();
 const getPhase = h => PHASES.find(p => h >= p.min && h < p.max) || PHASES[PHASES.length-1];
 
-function fmtH(mins) {
-  const h = Math.floor(Math.abs(mins)/60), m = Math.abs(mins)%60;
-  return h + 'h' + (m ? ` ${m}min` : '');
+function formatElapsed(ms) {
+  const totalMins = Math.floor(ms / 60000);
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  return `${h}h ${String(m).padStart(2,'0')}min`;
+}
+
+function formatRemaining(ms) {
+  if (ms <= 0) return '¡Listo!';
+  const totalMins = Math.floor(ms / 60000);
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  return `${h}h ${String(m).padStart(2,'0')}min`;
 }
 
 function nowLocal() {
@@ -794,13 +687,9 @@ try {
 function show(id) {
   ['screen-loading','screen-login','screen-app'].forEach(s => {
     const el = document.getElementById(s);
-    if (s === id) {
-      el.classList.remove('hidden');
-      el.style.display = '';
-    } else {
-      el.classList.add('hidden');
-      el.style.display = 'none';
-    }
+    const active = s === id;
+    el.classList.toggle('hidden', !active);
+    el.style.display = active ? '' : 'none';
   });
 }
 
@@ -810,9 +699,9 @@ if (auth) {
       uid = user.uid;
       document.getElementById('userAvatar').src = user.photoURL || '';
       document.getElementById('userName').textContent = user.displayName || user.email;
-      document.getElementById('currentTime').value    = nowLocal();
       document.getElementById('weightDatetime').value = nowLocal();
       show('screen-app');
+      loadCurrentFast();
     } else {
       uid = null;
       show('screen-login');
@@ -841,11 +730,12 @@ async function loginGoogle() {
 }
 
 async function logout() {
-  if (confirm('¿Cerrar sesión?')) await auth.signOut();
+  if (confirm('¿Cerrar sesión?')) { stopTimer(); await auth.signOut(); }
 }
 
 /* ─── FIRESTORE ─── */
-const col = name => db.collection('users').doc(uid).collection(name);
+const col     = name => db.collection('users').doc(uid).collection(name);
+const cfgDoc  = ()   => db.collection('users').doc(uid).collection('settings').doc('currentFast');
 
 async function getFasts()   { const s = await col('fasts').orderBy('savedAt','desc').get(); return s.docs.map(d => ({...d.data(), _id: d.id})); }
 async function addFast(d)   { await col('fasts').add({...d, savedAt: firebase.firestore.FieldValue.serverTimestamp()}); }
@@ -866,73 +756,142 @@ function switchTab(name, btn, title) {
   if (name === 'weight')  renderWeight();
 }
 
-/* ─── TRACKER ─── */
-let _lastCalc = null;
+/* ════════════════════════════════════════
+   TRACKER — LIVE TIMER
+════════════════════════════════════════ */
+let timerInterval  = null;
+let activeLastMeal = null;   // ISO string
+let activeProj     = null;   // ISO string or null
 
-function calcular() {
+async function loadCurrentFast() {
+  try {
+    const snap = await cfgDoc().get();
+    if (snap.exists) {
+      const d = snap.data();
+      activeLastMeal = d.lastMeal;
+      activeProj     = d.projectedMeal || null;
+      if (d.lastMeal) {
+        document.getElementById('lastMeal').value     = d.lastMeal;
+        document.getElementById('projectedMeal').value = d.projectedMeal || '';
+        showLiveState();
+        startTimer();
+      }
+    }
+  } catch(e) {}
+}
+
+async function iniciarSeguimiento() {
   const lv = document.getElementById('lastMeal').value;
-  const cv = document.getElementById('currentTime').value;
   const pv = document.getElementById('projectedMeal').value;
-  if (!lv || !cv) { alert('Ingresa la última comida y la hora actual.'); return; }
+  if (!lv) { alert('Ingresa la fecha y hora de tu última comida.'); return; }
+  if (new Date(lv) > new Date()) { alert('La última comida no puede ser en el futuro.'); return; }
 
-  const diffMs  = toMs(cv) - toMs(lv);
-  const diffPMs = pv ? toMs(pv) - toMs(lv) : null;
-  if (diffMs < 0) { alert('La hora actual debe ser posterior a la última comida.'); return; }
-  if (diffPMs != null && diffPMs < 0) { alert('El almuerzo proyectado debe ser posterior a la última comida.'); return; }
+  try {
+    await cfgDoc().set({
+      lastMeal:      lv,
+      projectedMeal: pv || null,
+      startedAt:     firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    activeLastMeal = lv;
+    activeProj     = pv || null;
+    showLiveState();
+    startTimer();
+    showToast('◆ Seguimiento iniciado');
+  } catch(e) {
+    showToast('Error al guardar — verifica conexión');
+  }
+}
 
-  const hAct  = diffMs / 3600000;
-  const hProj = diffPMs != null ? diffPMs / 3600000 : null;
+function showLiveState() {
+  document.getElementById('tracker-form').classList.add('hidden');
+  document.getElementById('tracker-live').classList.remove('hidden');
+  document.getElementById('navLiveBadge').classList.remove('hidden');
+
+  // Show "desde" line
+  document.getElementById('liveSince').textContent = fmtDate(activeLastMeal);
+
+  // Show remaining block only if projected set
+  if (activeProj) {
+    document.getElementById('liveRemBlock').classList.remove('hidden');
+  } else {
+    document.getElementById('liveRemBlock').classList.add('hidden');
+  }
+
+  // Projected phase card
+  if (activeProj) {
+    const hProj = (toMs(activeProj) - toMs(activeLastMeal)) / 3600000;
+    if (hProj > 0) renderProjPhase(hProj);
+  }
+}
+
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  tick();
+  timerInterval = setInterval(tick, 30000); // update every 30s
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function tick() {
+  if (!activeLastMeal) return;
+  const now    = new Date();
+  const msGone = now - new Date(activeLastMeal);
+  if (msGone < 0) return;
+
+  const hAct = msGone / 3600000;
+
+  // Live counters
+  document.getElementById('liveElapsed').textContent = formatElapsed(msGone);
+
+  if (activeProj) {
+    const msRem = toMs(activeProj) - now.getTime();
+    document.getElementById('liveRemaining').textContent = formatRemaining(msRem);
+  }
+
+  renderCurrentPhase(hAct);
+  renderTimeline(hAct, activeProj ? (toMs(activeProj) - toMs(activeLastMeal)) / 3600000 : null);
+  renderWater(hAct);
+}
+
+function renderCurrentPhase(hAct) {
   const phase = getPhase(hAct);
-  _lastCalc   = { lastMeal:lv, currentTime:cv, projectedMeal:pv||null, hAct, hProj, phase };
-
-  document.getElementById('horasActuales').textContent    = hAct.toFixed(1) + 'h';
-  document.getElementById('horasProyectadas').textContent = hProj != null ? hProj.toFixed(1) + 'h' : '—';
-  const rem = hProj != null ? hProj - hAct : null;
-  document.getElementById('horasRestantes').textContent   = rem != null ? (rem > 0 ? fmtH(Math.round(rem*60)) : '¡Listo!') : '—';
-
   const pc = document.getElementById('phaseCard');
-  pc.style.background = phase.bg; pc.style.borderColor = phase.border;
+  pc.style.background  = phase.bg;
+  pc.style.borderColor = phase.border;
   document.getElementById('phaseIcon').textContent  = phase.icon;
-  document.getElementById('phaseName').textContent  = phase.name;  document.getElementById('phaseName').style.color  = phase.text;
+  document.getElementById('phaseName').textContent  = phase.name;  document.getElementById('phaseName').style.color = phase.text;
   document.getElementById('phaseRange').textContent = `${phase.min}–${phase.max<999?phase.max:'72+'}h`; document.getElementById('phaseRange').style.color = phase.text;
-  document.getElementById('phaseDesc').textContent  = phase.desc;  document.getElementById('phaseDesc').style.color  = phase.text;
-
+  document.getElementById('phaseDesc').textContent  = phase.desc;  document.getElementById('phaseDesc').style.color = phase.text;
   const span = Math.min(phase.max<999?phase.max:phase.min+8, phase.min+8) - phase.min;
   const pct  = Math.min(100, Math.round(((hAct-phase.min)/span)*100));
   const pb = document.getElementById('progressBar');
   pb.style.width = pct + '%'; pb.style.background = phase.bar;
   document.getElementById('progressStart').textContent = phase.min + 'h';
   document.getElementById('progressEnd').textContent   = (phase.max<999?phase.max:'72+') + 'h';
-
-  const wMl = Math.max(200, Math.round(hAct*30/10)*10);
-  document.getElementById('waterTip').innerHTML =
-    `Agua recomendada hasta ahora: <strong>${wMl}–${wMl+200} ml</strong> · un vaso (~200 ml) por hora.`;
-
-  if (hProj != null) {
-    const pp = getPhase(hProj);
-    const ppc = document.getElementById('projPhaseCard');
-    ppc.classList.remove('hidden');
-    document.getElementById('projTotalLabel').textContent = hProj.toFixed(1) + 'h';
-    ppc.style.background = pp.bg; ppc.style.borderColor = pp.border;
-    document.getElementById('projPhaseIcon').textContent  = pp.icon;
-    document.getElementById('projPhaseName').textContent  = pp.name;  document.getElementById('projPhaseName').style.color = pp.text;
-    document.getElementById('projPhaseRange').textContent = `${pp.min}–${pp.max<999?pp.max:'72+'}h`; document.getElementById('projPhaseRange').style.color = pp.text;
-    document.getElementById('projPhaseDesc').textContent  = pp.desc;  document.getElementById('projPhaseDesc').style.color = pp.text;
-    const pSpan = Math.min(pp.max<999?pp.max:pp.min+8, pp.min+8) - pp.min;
-    const pPct  = Math.min(100, Math.round(((hProj-pp.min)/pSpan)*100));
-    const ppb = document.getElementById('projProgressBar');
-    ppb.style.width = pPct + '%'; ppb.style.background = pp.bar;
-    document.getElementById('projProgressStart').textContent = pp.min + 'h';
-    document.getElementById('projProgressEnd').textContent   = (pp.max<999?pp.max:'72+') + 'h';
-  } else {
-    document.getElementById('projPhaseCard').classList.add('hidden');
-  }
-
-  buildTimeline(hAct, hProj);
-  document.getElementById('resultado').classList.remove('hidden');
 }
 
-function buildTimeline(hAct, hProj) {
+function renderProjPhase(hProj) {
+  const pp  = getPhase(hProj);
+  const ppc = document.getElementById('projPhaseCard');
+  ppc.classList.remove('hidden');
+  document.getElementById('projTotalLabel').textContent = hProj.toFixed(1) + 'h';
+  ppc.style.background  = pp.bg;
+  ppc.style.borderColor = pp.border;
+  document.getElementById('projPhaseIcon').textContent  = pp.icon;
+  document.getElementById('projPhaseName').textContent  = pp.name;  document.getElementById('projPhaseName').style.color = pp.text;
+  document.getElementById('projPhaseRange').textContent = `${pp.min}–${pp.max<999?pp.max:'72+'}h`; document.getElementById('projPhaseRange').style.color = pp.text;
+  document.getElementById('projPhaseDesc').textContent  = pp.desc;  document.getElementById('projPhaseDesc').style.color = pp.text;
+  const pSpan = Math.min(pp.max<999?pp.max:pp.min+8, pp.min+8) - pp.min;
+  const pPct  = Math.min(100, Math.round(((hProj-pp.min)/pSpan)*100));
+  const ppb = document.getElementById('projProgressBar');
+  ppb.style.width = pPct + '%'; ppb.style.background = pp.bar;
+  document.getElementById('projProgressStart').textContent = pp.min + 'h';
+  document.getElementById('projProgressEnd').textContent   = (pp.max<999?pp.max:'72+') + 'h';
+}
+
+function renderTimeline(hAct, hProj) {
   document.getElementById('timeline').innerHTML = PHASES.slice(0,7).map(p => {
     const isNow  = hAct >= p.min && hAct < p.max;
     const isProj = hProj != null && hProj >= p.min && hProj < p.max && !isNow;
@@ -946,70 +905,151 @@ function buildTimeline(hAct, hProj) {
   }).join('');
 }
 
-async function guardarRegistro() {
-  if (!_lastCalc || !uid) return;
-  const btn = document.getElementById('saveBtn');
+function renderWater(hAct) {
+  const wMl = Math.max(200, Math.round(hAct*30/10)*10);
+  document.getElementById('waterTip').innerHTML =
+    `Agua recomendada hasta ahora: <strong>${wMl}–${wMl+200} ml</strong> · un vaso (~200 ml) por hora.`;
+}
+
+/* ── Registro de almuerzo (automático) ── */
+async function registrarAlmuerzo() {
+  if (!activeLastMeal || !uid) return;
+
+  const btn  = document.getElementById('lunchBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span>&nbsp;Guardando…';
+
+  const now    = new Date();
+  const msGone = now - new Date(activeLastMeal);
+  const hAct   = msGone / 3600000;
+  const hProj  = activeProj ? (toMs(activeProj) - toMs(activeLastMeal)) / 3600000 : null;
+  const phase  = getPhase(hAct);
+
   try {
     await addFast({
-      lastMeal:     _lastCalc.lastMeal,
-      currentTime:  _lastCalc.currentTime,
-      projectedMeal:_lastCalc.projectedMeal,
-      hAct:         _lastCalc.hAct,
-      hProj:        _lastCalc.hProj,
-      phaseName:    _lastCalc.phase.name,
-      phaseIcon:    _lastCalc.phase.icon,
-      phaseDot:     _lastCalc.phase.dot,
-      phaseText:    _lastCalc.phase.text,
+      lastMeal:     activeLastMeal,
+      endTime:      now.toISOString(),        // ← capturado automáticamente
+      hAct:         Math.round(hAct * 100) / 100,
+      hProj:        hProj ? Math.round(hProj * 100) / 100 : null,
+      phaseName:    phase.name,
+      phaseIcon:    phase.icon,
+      phaseDot:     phase.dot,
+      phaseText:    phase.text,
     });
-    showToast('🍽️ Registro de almuerzo guardado');
+
+    await cfgDoc().delete();
+    stopTimer();
+
+    activeLastMeal = null;
+    activeProj     = null;
+
+    // Reset UI
+    document.getElementById('tracker-live').classList.add('hidden');
+    document.getElementById('tracker-form').classList.remove('hidden');
+    document.getElementById('navLiveBadge').classList.add('hidden');
+    document.getElementById('projPhaseCard').classList.add('hidden');
+    document.getElementById('lastMeal').value      = '';
+    document.getElementById('projectedMeal').value = '';
+
+    showToast('🍽️ Almuerzo registrado — ' + hAct.toFixed(1) + 'h de ayuno');
   } catch(e) {
     showToast('Error al guardar — verifica tu conexión');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg> Registro de almuerzo';
+    btn.innerHTML = '🍽️ &nbsp;Registro de almuerzo';
   }
 }
 
-/* ─── HISTORY ─── */
+async function resetTracker() {
+  if (!confirm('¿Cambiar la última comida? El seguimiento actual se cancelará.')) return;
+  stopTimer();
+  try { await cfgDoc().delete(); } catch(e) {}
+  activeLastMeal = null;
+  activeProj     = null;
+  document.getElementById('tracker-live').classList.add('hidden');
+  document.getElementById('tracker-form').classList.remove('hidden');
+  document.getElementById('navLiveBadge').classList.add('hidden');
+  document.getElementById('projPhaseCard').classList.add('hidden');
+  document.getElementById('lastMeal').value      = '';
+  document.getElementById('projectedMeal').value = '';
+}
+
+/* ════════════════════════════════════════
+   HISTORY
+════════════════════════════════════════ */
 async function renderHistory() {
   document.getElementById('histList').innerHTML =
     '<div class="hist-empty"><span class="spin"></span></div>';
   try {
     const data = await getFasts();
     document.getElementById('histCount').textContent = data.length;
+
     if (data.length > 0) {
       const avg = data.reduce((a,d) => a+d.hAct, 0) / data.length;
       document.getElementById('histAvg').textContent = avg.toFixed(1) + 'h';
-      document.getElementById('histMax').textContent = Math.max(...data.map(d=>d.hAct)).toFixed(1) + 'h';
+      document.getElementById('histMax').textContent = Math.max(...data.map(d => d.hAct)).toFixed(1) + 'h';
+      renderPhaseStats(data);
     } else {
       document.getElementById('histAvg').textContent = '—';
       document.getElementById('histMax').textContent = '—';
+      document.getElementById('phaseStatsWrap').classList.add('hidden');
     }
 
     document.getElementById('histList').innerHTML = data.length === 0
-      ? '<div class="hist-empty">Sin registros aún.<br>Calcula un ayuno y presiona<br>"Registro de almuerzo".</div>'
-      : data.map(d => `
-        <div class="hist-card" style="border-left-color:${d.phaseDot}">
-          <div class="hist-header">
-            <div class="hist-icon">${d.phaseIcon}</div>
-            <div class="hist-info">
-              <div class="hist-date">${fmtDate(d.lastMeal)}</div>
-              <div class="hist-phase" style="color:${d.phaseText}">${d.phaseName}</div>
+      ? '<div class="hist-empty">Sin registros aún.<br>Inicia un seguimiento y presiona<br>"Registro de almuerzo" para guardar.</div>'
+      : data.map(d => {
+          const endStr = d.endTime ? fmtDate(d.endTime) : '—';
+          return `<div class="hist-card" style="border-left-color:${d.phaseDot}">
+            <div class="hist-header">
+              <div class="hist-icon">${d.phaseIcon}</div>
+              <div class="hist-info">
+                <div class="hist-date">Última comida: ${fmtDate(d.lastMeal)}</div>
+                <div class="hist-phase" style="color:${d.phaseText}">${d.phaseName}</div>
+              </div>
+              <div class="hist-hours">
+                <div class="hist-h-val">${d.hAct.toFixed(1)}h</div>
+                <div class="hist-h-sub">ayunadas</div>
+              </div>
+              <button class="btn-ghost" onclick="deleteFastEntry('${d._id}')">✕</button>
             </div>
-            <div class="hist-hours">
-              <div class="hist-h-val">${d.hAct.toFixed(1)}h</div>
-              <div class="hist-h-sub">ayunadas</div>
+            <div class="hist-proj">
+              Almuerzo: <span class="hist-teal">${endStr}</span>
+              ${d.hProj != null ? `&nbsp;·&nbsp; Proyectado: <span class="hist-teal">${d.hProj.toFixed(1)}h</span>` : ''}
             </div>
-            <button class="btn-ghost" onclick="deleteFastEntry('${d._id}')">✕</button>
-          </div>
-          ${d.hProj != null ? `<div class="hist-proj">Total proyectado: <span class="hist-teal">${d.hProj.toFixed(1)}h</span></div>` : ''}
-        </div>`).join('');
+          </div>`;
+        }).join('');
   } catch(e) {
     document.getElementById('histList').innerHTML =
       '<div class="hist-empty">Error al cargar.<br>Verifica tu conexión.</div>';
   }
+}
+
+function renderPhaseStats(data) {
+  // Count occurrences per phase (in phase order)
+  const counts = {};
+  data.forEach(d => {
+    counts[d.phaseName] = (counts[d.phaseName] || { icon: d.phaseIcon, dot: d.phaseDot, n: 0 });
+    counts[d.phaseName].n++;
+  });
+
+  const maxN = Math.max(...Object.values(counts).map(v => v.n));
+  // Sort by phase order
+  const sorted = PHASES
+    .filter(p => counts[p.name])
+    .map(p => ({ ...counts[p.name], name: p.name }));
+
+  if (sorted.length === 0) { document.getElementById('phaseStatsWrap').classList.add('hidden'); return; }
+
+  document.getElementById('phaseStatsWrap').classList.remove('hidden');
+  document.getElementById('phaseStatsList').innerHTML = sorted.map(s => `
+    <div class="phase-stat-row">
+      <div class="phase-stat-icon">${s.icon}</div>
+      <div class="phase-stat-name">${s.name}</div>
+      <div class="phase-stat-bar-wrap">
+        <div class="phase-stat-bar" style="width:${Math.round((s.n/maxN)*100)}%;background:${s.dot}"></div>
+      </div>
+      <div class="phase-stat-count" style="color:${s.dot}">${s.n}×</div>
+    </div>`).join('');
 }
 
 async function deleteFastEntry(id) {
@@ -1017,7 +1057,9 @@ async function deleteFastEntry(id) {
   catch(e) { showToast('Error al eliminar'); }
 }
 
-/* ─── WEIGHT ─── */
+/* ════════════════════════════════════════
+   WEIGHT
+════════════════════════════════════════ */
 let wChart = null;
 
 async function guardarPeso() {
@@ -1026,6 +1068,7 @@ async function guardarPeso() {
   const n  = document.getElementById('weightNote').value.trim();
   if (!w || w < 30 || w > 300) { alert('Ingresa un peso válido (30–300 kg).'); return; }
   if (!dt) { alert('Ingresa la fecha y hora.'); return; }
+
   const btn = document.getElementById('weightBtn');
   btn.disabled = true; btn.textContent = 'Guardando…';
   try {
@@ -1072,9 +1115,8 @@ async function renderWeight() {
       data: {
         labels,
         datasets: [
-          { data:weights, borderColor:'#a3e635', backgroundColor:'rgba(163,230,53,0.06)',
-            fill:true, tension:0.35, pointBackgroundColor:'#a3e635',
-            pointBorderColor:'#0d0f0e', pointBorderWidth:2, pointRadius:5, pointHoverRadius:7, borderWidth:2, order:1 },
+          { data:weights, borderColor:'#a3e635', backgroundColor:'rgba(163,230,53,0.07)', fill:true, tension:0.35,
+            pointBackgroundColor:'#a3e635', pointBorderColor:'#0d0f0e', pointBorderWidth:2, pointRadius:5, pointHoverRadius:7, borderWidth:2, order:1 },
           { data:Array(weights.length).fill(mean), borderColor:'rgba(255,255,255,0.12)',
             borderWidth:1, borderDash:[5,4], pointRadius:0, fill:false, tension:0, order:2 },
         ],
@@ -1084,13 +1126,11 @@ async function renderWeight() {
         interaction:{mode:'index',intersect:false},
         plugins: {
           legend:{display:false},
-          tooltip:{
-            backgroundColor:'#191c19', borderColor:'rgba(255,255,255,0.11)', borderWidth:1,
+          tooltip:{ backgroundColor:'#191c19', borderColor:'rgba(255,255,255,0.11)', borderWidth:1,
             titleColor:'#6b7d6d', titleFont:{family:"'DM Mono',monospace",size:11},
             bodyColor:'#e8ede9', bodyFont:{family:"'DM Mono',monospace",size:13}, padding:10,
             filter: item => item.datasetIndex === 0,
-            callbacks:{ label: ctx => `  ${ctx.parsed.y.toFixed(1)} kg` },
-          },
+            callbacks:{ label: ctx => `  ${ctx.parsed.y.toFixed(1)} kg` } },
         },
         scales: {
           x:{ grid:{color:'rgba(255,255,255,0.04)'}, border:{display:false}, ticks:{color:'#6b7d6d',font:{family:"'DM Mono',monospace",size:10},maxRotation:30} },
@@ -1101,7 +1141,7 @@ async function renderWeight() {
 
     const wd = raw.map((d,i) => ({...d, delta: i>0 ? d.weight-raw[i-1].weight : null}));
     document.getElementById('weightList').innerHTML = [...wd].reverse().map(d => {
-      const ds  = d.delta!=null ? (d.delta>=0?'+':'') + d.delta.toFixed(1)+' kg' : '—';
+      const ds  = d.delta!=null ? (d.delta>=0?'+':'')+d.delta.toFixed(1)+' kg' : '—';
       const cls = d.delta==null?'delta-neu':d.delta<0?'delta-neg':d.delta>0?'delta-pos':'delta-neu';
       return `<div class="w-entry">
         <div class="w-entry-val">${d.weight.toFixed(1)} kg</div>
@@ -1118,14 +1158,12 @@ async function deleteWeightEntry(id) {
   catch(e) { showToast('Error al eliminar'); }
 }
 
-/* ─── PWA INSTALL ─── */
+/* ── PWA INSTALL ── */
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
+  e.preventDefault(); deferredPrompt = e;
   document.getElementById('installBtn').classList.add('visible');
 });
-
 async function installPwa() {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
@@ -1133,12 +1171,9 @@ async function installPwa() {
   if (outcome === 'accepted') document.getElementById('installBtn').classList.remove('visible');
   deferredPrompt = null;
 }
+window.addEventListener('appinstalled', () => document.getElementById('installBtn').classList.remove('visible'));
 
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBtn').classList.remove('visible');
-});
-
-/* ─── SW ─── */
+/* ── SW ── */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 }
