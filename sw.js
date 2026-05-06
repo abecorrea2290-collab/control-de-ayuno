@@ -1,5 +1,5 @@
-const CACHE = 'ayuno-v1';
-const SHELL = ['/', '/index.html', '/manifest.json', '/icon.svg'];
+const CACHE = 'ayuno-v3';
+const SHELL = ['/', '/index.html', '/manifest.json', '/icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
@@ -18,7 +18,6 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
-  // Only cache same-origin requests (skip Firebase/CDN)
   if (url.origin !== self.location.origin) return;
 
   e.respondWith(

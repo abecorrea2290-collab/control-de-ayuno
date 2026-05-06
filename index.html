@@ -238,6 +238,18 @@ svg { display: block; }
 .w-stat  { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 0.8rem; }
 .w-stat-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
 .w-stat-val   { font-family: var(--mono); font-size: 14px; font-weight: 500; line-height: 1; }
+.w-trend-card { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; }
+.w-trend-icon { width: 32px; height: 32px; flex-shrink: 0; }
+.w-trend-icon svg { width: 100%; height: 100%; }
+.w-trend-info { flex: 1; }
+.w-trend-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.w-trend-val  { font-family: var(--mono); font-size: 20px; font-weight: 500; line-height: 1; }
+.w-trend-sub  { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 3px; }
+.w-pred-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.w-pred-card  { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 0.9rem 1rem; }
+.w-pred-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
+.w-pred-val   { font-family: var(--mono); font-size: 18px; font-weight: 500; line-height: 1; }
+.w-pred-sub   { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 3px; }
 .chart-wrap   { position: relative; height: 200px; }
 .w-entry      { display: flex; align-items: center; gap: 10px; padding: 9px 1.25rem; border-bottom: 0.5px solid var(--border); font-size: 13px; }
 .w-entry:last-child  { border-bottom: none; }
@@ -546,6 +558,30 @@ svg { display: block; }
             <div class="w-stat"><div class="w-stat-label">Cambio</div><div class="w-stat-val" id="wDelta">—</div></div>
             <div class="w-stat"><div class="w-stat-label">Mínimo</div><div class="w-stat-val" id="wMin">—</div></div>
             <div class="w-stat"><div class="w-stat-label">Varianza ±σ</div><div class="w-stat-val" id="wVar">—</div></div>
+          </div>
+
+          <!-- Tendencia -->
+          <div class="w-trend-card" id="wTrendCard">
+            <div class="w-trend-icon" id="wTrendIcon"></div>
+            <div class="w-trend-info">
+              <div class="w-trend-label">Tendencia semanal</div>
+              <div class="w-trend-val" id="wTrendVal">—</div>
+              <div class="w-trend-sub" id="wTrendSub"></div>
+            </div>
+          </div>
+
+          <!-- Predicciones -->
+          <div class="w-pred-grid">
+            <div class="w-pred-card">
+              <div class="w-pred-label">Proyección 7 días</div>
+              <div class="w-pred-val" id="wPred7">—</div>
+              <div class="w-pred-sub" id="wPred7Sub"></div>
+            </div>
+            <div class="w-pred-card">
+              <div class="w-pred-label">Proyección 30 días</div>
+              <div class="w-pred-val" id="wPred30">—</div>
+              <div class="w-pred-sub" id="wPred30Sub"></div>
+            </div>
           </div>
 
           <div class="card" style="padding:1.25rem 1.25rem 1rem">
@@ -1054,6 +1090,19 @@ async function guardarPeso() {
   }
 }
 
+function linReg(xs, ys) {
+  const n   = xs.length;
+  const sx  = xs.reduce((a,b) => a+b, 0);
+  const sy  = ys.reduce((a,b) => a+b, 0);
+  const sxy = xs.reduce((a,x,i) => a + x*ys[i], 0);
+  const sx2 = xs.reduce((a,x) => a + x*x, 0);
+  const denom = n*sx2 - sx*sx;
+  if (denom === 0) return { slope: 0, intercept: sy/n };
+  const slope     = (n*sxy - sx*sy) / denom;
+  const intercept = (sy - slope*sx) / n;
+  return { slope, intercept };
+}
+
 async function renderWeight() {
   try {
     const raw = await getWeights();
@@ -1075,6 +1124,48 @@ async function renderWeight() {
     document.getElementById('wMin').textContent = min.toFixed(1) + ' kg';
     document.getElementById('wVar').textContent = '±' + std.toFixed(1) + ' kg';
 
+    /* ── Regresión lineal (días desde primer registro) ── */
+    const t0   = new Date(raw[0].datetime).getTime();
+    const xs   = raw.map(d => (new Date(d.datetime).getTime() - t0) / 86400000);
+    const { slope, intercept } = linReg(xs, weights);
+    const slopeWeek = slope * 7;
+
+    const trendCard = document.getElementById('wTrendCard');
+    const trendVal  = document.getElementById('wTrendVal');
+    const trendSub  = document.getElementById('wTrendSub');
+    const trendIcon = document.getElementById('wTrendIcon');
+
+    const trendColor = slopeWeek < -0.05 ? 'var(--accent)' : slopeWeek > 0.05 ? 'var(--coral)' : 'var(--muted)';
+    trendVal.textContent = (slopeWeek >= 0 ? '+' : '') + slopeWeek.toFixed(2) + ' kg/semana';
+    trendVal.style.color = trendColor;
+
+    if (Math.abs(slopeWeek) < 0.05) {
+      trendSub.textContent = 'Peso estable';
+      trendIcon.innerHTML  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+    } else if (slopeWeek < 0) {
+      trendSub.textContent = 'Tendencia a la baja';
+      trendIcon.innerHTML  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>`;
+    } else {
+      trendSub.textContent = 'Tendencia al alza';
+      trendIcon.innerHTML  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--coral)"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`;
+    }
+
+    /* Predicciones */
+    const lastX  = xs[xs.length - 1];
+    const pred7  = intercept + slope * (lastX + 7);
+    const pred30 = intercept + slope * (lastX + 30);
+    const d7     = pred7  - last;
+    const d30    = pred30 - last;
+
+    const p7El  = document.getElementById('wPred7');
+    const p30El = document.getElementById('wPred30');
+    p7El.textContent  = pred7.toFixed(1)  + ' kg';
+    p30El.textContent = pred30.toFixed(1) + ' kg';
+    p7El.style.color  = d7  < 0 ? 'var(--accent)' : d7  > 0 ? 'var(--coral)' : 'var(--text)';
+    p30El.style.color = d30 < 0 ? 'var(--accent)' : d30 > 0 ? 'var(--coral)' : 'var(--text)';
+    document.getElementById('wPred7Sub').textContent  = (d7  >= 0 ? '+' : '') + d7.toFixed(1)  + ' kg vs hoy';
+    document.getElementById('wPred30Sub').textContent = (d30 >= 0 ? '+' : '') + d30.toFixed(1) + ' kg vs hoy';
+
     const labels = raw.map(d => fmtDateShort(d.datetime));
     const ctx    = document.getElementById('weightChart').getContext('2d');
     if (wChart) wChart.destroy();
@@ -1086,8 +1177,10 @@ async function renderWeight() {
         datasets: [
           { data:weights, borderColor:'#a3e635', backgroundColor:'rgba(163,230,53,0.07)', fill:true, tension:0.35,
             pointBackgroundColor:'#a3e635', pointBorderColor:'#0d0f0e', pointBorderWidth:2, pointRadius:5, pointHoverRadius:7, borderWidth:2, order:1 },
-          { data:Array(weights.length).fill(mean), borderColor:'rgba(255,255,255,0.12)',
-            borderWidth:1, borderDash:[5,4], pointRadius:0, fill:false, tension:0, order:2 },
+          { data:Array(weights.length).fill(mean), borderColor:'rgba(255,255,255,0.10)',
+            borderWidth:1, borderDash:[4,4], pointRadius:0, fill:false, tension:0, order:3 },
+          { data:xs.map(x => parseFloat((intercept + slope*x).toFixed(2))), borderColor:'rgba(45,212,191,0.55)',
+            borderWidth:1.5, borderDash:[6,3], pointRadius:0, fill:false, tension:0, order:2 },
         ],
       },
       options: {
