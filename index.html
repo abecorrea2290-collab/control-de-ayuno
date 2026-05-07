@@ -533,7 +533,7 @@ svg { display: block; }
           <div class="input-grid">
             <div class="field">
               <label>Peso (kg)</label>
-              <input type="number" id="weightInput" step="0.1" min="30" max="300" placeholder="75.0" />
+              <input type="number" id="weightInput" step="0.001" min="30" max="300" placeholder="75.000" />
             </div>
             <div class="field">
               <label>Fecha y hora</label>
@@ -1128,12 +1128,12 @@ async function renderWeight() {
     const mean    = weights.reduce((a,b) => a+b, 0) / weights.length;
     const std     = Math.sqrt(weights.reduce((a,b) => a+(b-mean)**2, 0) / weights.length);
 
-    document.getElementById('wLast').textContent = last.toFixed(1) + ' kg';
+    document.getElementById('wLast').textContent = last.toFixed(3) + ' kg';
     const dEl = document.getElementById('wDelta');
-    dEl.textContent = (delta>=0?'+':'') + delta.toFixed(1) + ' kg';
+    dEl.textContent = (delta>=0?'+':'') + delta.toFixed(3) + ' kg';
     dEl.className   = 'w-stat-val ' + (delta<0?'delta-neg':delta>0?'delta-pos':'delta-neu');
-    document.getElementById('wMin').textContent = min.toFixed(1) + ' kg';
-    document.getElementById('wVar').textContent = '±' + std.toFixed(1) + ' kg';
+    document.getElementById('wMin').textContent = min.toFixed(3) + ' kg';
+    document.getElementById('wVar').textContent = '±' + std.toFixed(3) + ' kg';
 
     /* ── Regresión lineal (días desde primer registro) ── */
     const t0   = new Date(raw[0].datetime).getTime();
@@ -1147,7 +1147,7 @@ async function renderWeight() {
     const trendIcon = document.getElementById('wTrendIcon');
 
     const trendColor = slopeWeek < -0.05 ? 'var(--accent)' : slopeWeek > 0.05 ? 'var(--coral)' : 'var(--muted)';
-    trendVal.textContent = (slopeWeek >= 0 ? '+' : '') + slopeWeek.toFixed(2) + ' kg/semana';
+    trendVal.textContent = (slopeWeek >= 0 ? '+' : '') + slopeWeek.toFixed(3) + ' kg/semana';
     trendVal.style.color = trendColor;
 
     if (Math.abs(slopeWeek) < 0.05) {
@@ -1170,12 +1170,12 @@ async function renderWeight() {
 
     const p7El  = document.getElementById('wPred7');
     const p30El = document.getElementById('wPred30');
-    p7El.textContent  = pred7.toFixed(1)  + ' kg';
-    p30El.textContent = pred30.toFixed(1) + ' kg';
+    p7El.textContent  = pred7.toFixed(3)  + ' kg';
+    p30El.textContent = pred30.toFixed(3) + ' kg';
     p7El.style.color  = d7  < 0 ? 'var(--accent)' : d7  > 0 ? 'var(--coral)' : 'var(--text)';
     p30El.style.color = d30 < 0 ? 'var(--accent)' : d30 > 0 ? 'var(--coral)' : 'var(--text)';
-    document.getElementById('wPred7Sub').textContent  = (d7  >= 0 ? '+' : '') + d7.toFixed(1)  + ' kg vs hoy';
-    document.getElementById('wPred30Sub').textContent = (d30 >= 0 ? '+' : '') + d30.toFixed(1) + ' kg vs hoy';
+    document.getElementById('wPred7Sub').textContent  = (d7  >= 0 ? '+' : '') + d7.toFixed(3)  + ' kg vs hoy';
+    document.getElementById('wPred30Sub').textContent = (d30 >= 0 ? '+' : '') + d30.toFixed(3) + ' kg vs hoy';
 
     const labels = raw.map(d => fmtDateShort(d.datetime));
     const ctx    = document.getElementById('weightChart').getContext('2d');
@@ -1203,7 +1203,7 @@ async function renderWeight() {
             titleColor:'#6b7d6d', titleFont:{family:"'DM Mono',monospace",size:11},
             bodyColor:'#e8ede9', bodyFont:{family:"'DM Mono',monospace",size:13}, padding:10,
             filter: item => item.datasetIndex === 0,
-            callbacks:{ label: ctx => `  ${ctx.parsed.y.toFixed(1)} kg` } },
+            callbacks:{ label: ctx => `  ${ctx.parsed.y.toFixed(3)} kg` } },
         },
         scales: {
           x:{ grid:{color:'rgba(255,255,255,0.04)'}, border:{display:false}, ticks:{color:'#6b7d6d',font:{family:"'DM Mono',monospace",size:10},maxRotation:30} },
@@ -1214,10 +1214,10 @@ async function renderWeight() {
 
     const wd = raw.map((d,i) => ({...d, delta: i>0 ? d.weight-raw[i-1].weight : null}));
     document.getElementById('weightList').innerHTML = [...wd].reverse().map(d => {
-      const ds  = d.delta!=null ? (d.delta>=0?'+':'')+d.delta.toFixed(1)+' kg' : '—';
+      const ds  = d.delta!=null ? (d.delta>=0?'+':'')+d.delta.toFixed(3)+' kg' : '—';
       const cls = d.delta==null?'delta-neu':d.delta<0?'delta-neg':d.delta>0?'delta-pos':'delta-neu';
       return `<div class="w-entry">
-        <div class="w-entry-val">${d.weight.toFixed(1)} kg</div>
+        <div class="w-entry-val">${d.weight.toFixed(3)} kg</div>
         <div class="w-entry-date">${fmtDate(d.datetime)}${d.note?` · <em style="opacity:0.5">${d.note}</em>`:''}</div>
         <div class="w-entry-delta ${cls}">${ds}</div>
         <button class="btn-ghost" onclick="deleteWeightEntry('${d._id}')">${ICONS.xMark}</button>
