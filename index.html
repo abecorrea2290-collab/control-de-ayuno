@@ -951,19 +951,30 @@ async function registrarAlmuerzo() {
       phaseText: phase.text,
     });
 
-    await cfgDoc().delete();
-    stopTimer();
-    activeLastMeal = null;
+    // 2 — Iniciar nuevo ayuno automáticamente desde ahora
+    const newLastMeal = now.toISOString();
+    await cfgDoc().set({
+      lastMeal:      newLastMeal,
+      projectedMeal: null,
+      startedAt:     firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // 3 — Actualizar estado en memoria
+    activeLastMeal = newLastMeal;
     activeProj     = null;
 
-    document.getElementById('tracker-live').classList.add('hidden');
-    document.getElementById('tracker-form').classList.remove('hidden');
-    document.getElementById('navLiveBadge').classList.add('hidden');
+    // 4 — Actualizar UI sin salir del estado live
+    document.getElementById('liveSince').textContent = fmtDate(newLastMeal);
+    document.getElementById('liveRemBlock').classList.add('hidden');
     document.getElementById('projPhaseCard').classList.add('hidden');
-    document.getElementById('lastMeal').value      = '';
+    document.getElementById('lastMeal').value      = nowLocal();
     document.getElementById('projectedMeal').value = '';
 
-    showToast('Almuerzo registrado — ' + hAct.toFixed(1) + 'h de ayuno');
+    // 5 — Reiniciar contador desde cero
+    stopTimer();
+    startTimer();
+
+    showToast('✓ ' + hAct.toFixed(1) + 'h completadas · nuevo ayuno iniciado');
   } catch(e) {
     showToast('Error al guardar — verifica tu conexión');
   } finally {
