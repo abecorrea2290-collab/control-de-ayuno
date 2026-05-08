@@ -149,6 +149,12 @@ svg { display: block; }
 .btn-lunch { width: 100%; padding: 13px 16px; margin-top: 10px; background: var(--surface2); color: var(--text); border: 0.5px solid var(--border2); border-radius: 8px; font-family: var(--sans); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 9px; transition: all 0.15s; }
 .btn-lunch:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 .btn-lunch:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-dinner:hover { border-color: var(--teal) !important; color: var(--teal) !important; background: var(--teal-dim) !important; }
+.meal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.meal-btns .btn-lunch { margin-top: 0; }
+.meal-type-badge { font-family: var(--mono); font-size: 9px; padding: 2px 7px; border-radius: 99px; letter-spacing: 0.06em; }
+.meal-badge-lunch  { background: rgba(163,230,53,0.12); color: var(--accent); }
+.meal-badge-dinner { background: rgba(45,212,191,0.12); color: var(--teal); }
 
 .btn-ghost { padding: 5px 8px; color: var(--muted); border: 0.5px solid var(--border); border-radius: 6px; font-family: var(--mono); font-size: 11px; transition: all 0.15s; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
 .btn-ghost:hover { color: var(--coral); border-color: rgba(251,113,133,0.4); }
@@ -468,12 +474,20 @@ svg { display: block; }
             <div id="timeline"></div>
           </div>
 
-          <button id="lunchBtn" class="btn-lunch" onclick="registrarAlmuerzo()">
-            <span class="btn-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="12"/><path d="M6 2v3a2 2 0 0 0 4 0V2"/><line x1="8" y1="12" x2="8" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/></svg>
-            </span>
-            Registro de almuerzo
-          </button>
+          <div class="meal-btns">
+            <button id="lunchBtn" class="btn-lunch" onclick="registrarComida('almuerzo')">
+              <span class="btn-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="12"/><path d="M6 2v3a2 2 0 0 0 4 0V2"/><line x1="8" y1="12" x2="8" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/></svg>
+              </span>
+              Registro de almuerzo
+            </button>
+            <button id="dinnerBtn" class="btn-lunch btn-dinner" onclick="registrarComida('cena')">
+              <span class="btn-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              </span>
+              Registro de cena
+            </button>
+          </div>
 
           <div style="text-align:center;margin-top:12px">
             <button class="btn-text" onclick="resetTracker()">Cambiar última comida</button>
@@ -925,12 +939,27 @@ function renderWater(hAct) {
     `Agua recomendada hasta ahora: <strong>${wMl}–${wMl+200} ml</strong> · un vaso (~200 ml) por hora.`;
 }
 
-/* ── Registro de almuerzo ── */
-async function registrarAlmuerzo() {
-  if (!activeLastMeal || !uid) return;
+/* ── Registro de comida (almuerzo / cena) ── */
+const MEAL_META = {
+  almuerzo: {
+    btnId: 'lunchBtn',
+    label: 'Registro de almuerzo',
+    icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="12"/><path d="M6 2v3a2 2 0 0 0 4 0V2"/><line x1="8" y1="12" x2="8" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/></svg>`,
+  },
+  cena: {
+    btnId: 'dinnerBtn',
+    label: 'Registro de cena',
+    icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+  },
+};
 
-  const btn  = document.getElementById('lunchBtn');
-  btn.disabled = true;
+async function registrarComida(tipo) {
+  if (!activeLastMeal || !uid) return;
+  const meta = MEAL_META[tipo];
+  const btn  = document.getElementById(meta.btnId);
+  // Deshabilitar ambos botones mientras guarda
+  document.getElementById('lunchBtn').disabled  = true;
+  document.getElementById('dinnerBtn').disabled = true;
   btn.innerHTML = '<span class="spin"></span>&nbsp;Guardando…';
 
   const now    = new Date();
@@ -940,9 +969,11 @@ async function registrarAlmuerzo() {
   const phase  = getPhase(hAct);
 
   try {
+    // 1 — Guardar ayuno completado en historial
     await addFast({
       lastMeal:  activeLastMeal,
       endTime:   now.toISOString(),
+      mealType:  tipo,
       hAct:      Math.round(hAct * 100) / 100,
       hProj:     hProj ? Math.round(hProj * 100) / 100 : null,
       phaseName: phase.name,
@@ -951,7 +982,7 @@ async function registrarAlmuerzo() {
       phaseText: phase.text,
     });
 
-    // 2 — Iniciar nuevo ayuno automáticamente desde ahora
+    // 2 — Iniciar nuevo ayuno desde ahora
     const newLastMeal = now.toISOString();
     await cfgDoc().set({
       lastMeal:      newLastMeal,
@@ -959,27 +990,33 @@ async function registrarAlmuerzo() {
       startedAt:     firebase.firestore.FieldValue.serverTimestamp(),
     });
 
-    // 3 — Actualizar estado en memoria
+    // 3 — Actualizar estado
     activeLastMeal = newLastMeal;
     activeProj     = null;
 
-    // 4 — Actualizar UI sin salir del estado live
+    // 4 — Actualizar UI
     document.getElementById('liveSince').textContent = fmtDate(newLastMeal);
     document.getElementById('liveRemBlock').classList.add('hidden');
     document.getElementById('projPhaseCard').classList.add('hidden');
     document.getElementById('lastMeal').value      = nowLocal();
     document.getElementById('projectedMeal').value = '';
 
-    // 5 — Reiniciar contador desde cero
+    // 5 — Reiniciar contador
     stopTimer();
     startTimer();
 
-    showToast('✓ ' + hAct.toFixed(1) + 'h completadas · nuevo ayuno iniciado');
+    const tipoLabel = tipo === 'cena' ? 'Cena' : 'Almuerzo';
+    showToast(`✓ ${tipoLabel} · ${hAct.toFixed(1)}h completadas · nuevo ayuno iniciado`);
   } catch(e) {
     showToast('Error al guardar — verifica tu conexión');
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = `<span class="btn-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="12"/><path d="M6 2v3a2 2 0 0 0 4 0V2"/><line x1="8" y1="12" x2="8" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/></svg></span>&nbsp;Registro de almuerzo`;
+    document.getElementById('lunchBtn').disabled  = false;
+    document.getElementById('dinnerBtn').disabled = false;
+    // Restaurar label de cada botón
+    Object.values(MEAL_META).forEach(m => {
+      document.getElementById(m.btnId).innerHTML =
+        `<span class="btn-icon">${m.icon}</span>&nbsp;${m.label}`;
+    });
   }
 }
 
@@ -1020,12 +1057,18 @@ async function renderHistory() {
     document.getElementById('histList').innerHTML = data.length === 0
       ? '<div class="hist-empty">Sin registros aún.<br>Inicia un seguimiento y presiona<br>"Registro de almuerzo" para guardar.</div>'
       : data.map(d => {
-          const endStr = d.endTime ? fmtDate(d.endTime) : '—';
+          const endStr    = d.endTime ? fmtDate(d.endTime) : '—';
+          const mealType  = d.mealType || 'almuerzo';
+          const mealLabel = mealType === 'cena' ? 'Cena' : 'Almuerzo';
+          const mealClass = mealType === 'cena' ? 'meal-badge-dinner' : 'meal-badge-lunch';
           return `<div class="hist-card" style="border-left-color:${d.phaseDot}">
             <div class="hist-header">
               <div class="hist-icon" style="color:${d.phaseText}">${phaseIconHtml(d.phaseIcon)}</div>
               <div class="hist-info">
-                <div class="hist-date">Última comida: ${fmtDate(d.lastMeal)}</div>
+                <div class="hist-date" style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                  <span>${fmtDate(d.lastMeal)}</span>
+                  <span class="meal-type-badge ${mealClass}">${mealLabel}</span>
+                </div>
                 <div class="hist-phase" style="color:${d.phaseText}">${d.phaseName}</div>
               </div>
               <div class="hist-hours">
@@ -1035,7 +1078,7 @@ async function renderHistory() {
               <button class="btn-ghost" onclick="deleteFastEntry('${d._id}')">${ICONS.xMark}</button>
             </div>
             <div class="hist-proj">
-              Almuerzo: <span class="hist-teal">${endStr}</span>
+              ${mealLabel}: <span class="hist-teal">${endStr}</span>
               ${d.hProj != null ? `&nbsp;·&nbsp; Proyectado: <span class="hist-teal">${d.hProj.toFixed(1)}h</span>` : ''}
             </div>
           </div>`;
