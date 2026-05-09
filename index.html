@@ -149,12 +149,15 @@ svg { display: block; }
 .btn-lunch { width: 100%; padding: 13px 16px; margin-top: 10px; background: var(--surface2); color: var(--text); border: 0.5px solid var(--border2); border-radius: 8px; font-family: var(--sans); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 9px; transition: all 0.15s; }
 .btn-lunch:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 .btn-lunch:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-dinner:hover { border-color: var(--teal) !important; color: var(--teal) !important; background: var(--teal-dim) !important; }
-.meal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-.meal-btns .btn-lunch { margin-top: 0; }
+.btn-breakfast:hover { border-color: #fbbf24 !important; color: #fbbf24 !important; background: rgba(251,191,36,0.10) !important; }
+.btn-dinner:hover    { border-color: var(--teal) !important; color: var(--teal) !important; background: var(--teal-dim) !important; }
+.meal-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+.meal-btns .btn-lunch { margin-top: 0; padding: 11px 6px; font-size: 12px; gap: 6px; }
 .meal-type-badge { font-family: var(--mono); font-size: 9px; padding: 2px 7px; border-radius: 99px; letter-spacing: 0.06em; }
-.meal-badge-lunch  { background: rgba(163,230,53,0.12); color: var(--accent); }
-.meal-badge-dinner { background: rgba(45,212,191,0.12); color: var(--teal); }
+.meal-badge-breakfast { background: rgba(251,191,36,0.12); color: #fbbf24; }
+.meal-badge-lunch     { background: rgba(163,230,53,0.12); color: var(--accent); }
+.meal-badge-dinner    { background: rgba(45,212,191,0.12);  color: var(--teal); }
+@media (max-width: 700px) { .meal-btns { grid-template-columns: 1fr 1fr 1fr; } }
 
 .btn-ghost { padding: 5px 8px; color: var(--muted); border: 0.5px solid var(--border); border-radius: 6px; font-family: var(--mono); font-size: 11px; transition: all 0.15s; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
 .btn-ghost:hover { color: var(--coral); border-color: rgba(251,113,133,0.4); }
@@ -475,17 +478,23 @@ svg { display: block; }
           </div>
 
           <div class="meal-btns">
+            <button id="breakfastBtn" class="btn-lunch btn-breakfast" onclick="registrarComida('desayuno')">
+              <span class="btn-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+              </span>
+              Desayuno
+            </button>
             <button id="lunchBtn" class="btn-lunch" onclick="registrarComida('almuerzo')">
               <span class="btn-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="12"/><path d="M6 2v3a2 2 0 0 0 4 0V2"/><line x1="8" y1="12" x2="8" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="12"/><path d="M6 2v3a2 2 0 0 0 4 0V2"/><line x1="8" y1="12" x2="8" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/></svg>
               </span>
-              Registro de almuerzo
+              Almuerzo
             </button>
             <button id="dinnerBtn" class="btn-lunch btn-dinner" onclick="registrarComida('cena')">
               <span class="btn-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
               </span>
-              Registro de cena
+              Cena
             </button>
           </div>
 
@@ -941,15 +950,20 @@ function renderWater(hAct) {
 
 /* ── Registro de comida (almuerzo / cena) ── */
 const MEAL_META = {
+  desayuno: {
+    btnId: 'breakfastBtn',
+    label: 'Desayuno',
+    icon: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`,
+  },
   almuerzo: {
     btnId: 'lunchBtn',
-    label: 'Registro de almuerzo',
-    icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="12"/><path d="M6 2v3a2 2 0 0 0 4 0V2"/><line x1="8" y1="12" x2="8" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/></svg>`,
+    label: 'Almuerzo',
+    icon: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="12"/><path d="M6 2v3a2 2 0 0 0 4 0V2"/><line x1="8" y1="12" x2="8" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/></svg>`,
   },
   cena: {
     btnId: 'dinnerBtn',
-    label: 'Registro de cena',
-    icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+    label: 'Cena',
+    icon: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
   },
 };
 
@@ -957,9 +971,10 @@ async function registrarComida(tipo) {
   if (!activeLastMeal || !uid) return;
   const meta = MEAL_META[tipo];
   const btn  = document.getElementById(meta.btnId);
-  // Deshabilitar ambos botones mientras guarda
-  document.getElementById('lunchBtn').disabled  = true;
-  document.getElementById('dinnerBtn').disabled = true;
+  // Deshabilitar todos los botones de comida mientras guarda
+  document.getElementById('breakfastBtn').disabled = true;
+  document.getElementById('lunchBtn').disabled     = true;
+  document.getElementById('dinnerBtn').disabled    = true;
   btn.innerHTML = '<span class="spin"></span>&nbsp;Guardando…';
 
   const now    = new Date();
@@ -1010,8 +1025,9 @@ async function registrarComida(tipo) {
   } catch(e) {
     showToast('Error al guardar — verifica tu conexión');
   } finally {
-    document.getElementById('lunchBtn').disabled  = false;
-    document.getElementById('dinnerBtn').disabled = false;
+    document.getElementById('breakfastBtn').disabled = false;
+    document.getElementById('lunchBtn').disabled     = false;
+    document.getElementById('dinnerBtn').disabled    = false;
     // Restaurar label de cada botón
     Object.values(MEAL_META).forEach(m => {
       document.getElementById(m.btnId).innerHTML =
@@ -1059,8 +1075,8 @@ async function renderHistory() {
       : data.map(d => {
           const endStr    = d.endTime ? fmtDate(d.endTime) : '—';
           const mealType  = d.mealType || 'almuerzo';
-          const mealLabel = mealType === 'cena' ? 'Cena' : 'Almuerzo';
-          const mealClass = mealType === 'cena' ? 'meal-badge-dinner' : 'meal-badge-lunch';
+          const mealLabel = mealType === 'cena' ? 'Cena' : mealType === 'desayuno' ? 'Desayuno' : 'Almuerzo';
+          const mealClass = mealType === 'cena' ? 'meal-badge-dinner' : mealType === 'desayuno' ? 'meal-badge-breakfast' : 'meal-badge-lunch';
           return `<div class="hist-card" style="border-left-color:${d.phaseDot}">
             <div class="hist-header">
               <div class="hist-icon" style="color:${d.phaseText}">${phaseIconHtml(d.phaseIcon)}</div>
