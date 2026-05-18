@@ -1,8 +1,8 @@
-const CACHE = 'ayuno-v4';
-const SHELL = ['/', '/index.html', '/manifest.json', '/icon.png'];
+const CACHE = 'ayuno-v7';
+const STATIC = ['/manifest.json', '/icon.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));
   self.skipWaiting();
 });
 
@@ -20,6 +20,17 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (url.origin !== self.location.origin) return;
 
+  // HTML siempre desde la red (nunca cacheado)
+  if (e.request.mode === 'navigate' ||
+      url.pathname === '/' ||
+      url.pathname.endsWith('.html')) {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // Resto: cache-first
   e.respondWith(
     caches.match(e.request).then(cached => {
       const network = fetch(e.request).then(res => {
