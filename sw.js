@@ -1,4 +1,4 @@
-const CACHE = 'ayuno-v7';
+const CACHE = 'ayuno-v8';
 const STATIC = ['/manifest.json', '/icon.png'];
 
 self.addEventListener('install', e => {

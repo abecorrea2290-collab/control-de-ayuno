@@ -165,6 +165,11 @@ svg { display: block; }
 .btn-text { font-family: var(--mono); font-size: 11px; color: var(--muted); text-decoration: underline; padding: 4px; transition: color 0.15s; }
 .btn-text:hover { color: var(--coral); }
 
+.btn-danger-outline { width:100%; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px; margin-bottom:12px; background:transparent; border:1px solid rgba(251,113,133,0.3); color:var(--coral); border-radius:8px; font-family:var(--mono); font-size:12px; transition:all 0.15s; }
+.btn-danger-outline:hover { background:rgba(251,113,133,0.08); border-color:rgba(251,113,133,0.6); }
+
+.w-entry-fast { font-size:10px; color:var(--teal); font-family:var(--mono); white-space:nowrap; }
+
 /* ── Live tracker card ── */
 .live-card { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 12px; }
 .live-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
@@ -536,13 +541,9 @@ svg { display: block; }
           </div>
         </div>
 
-        <!-- Panel diagnóstico temporal -->
-        <div id="debugPanel" style="background:#1a1f1d;border:1px solid #ff6b35;border-radius:10px;padding:12px;margin-bottom:12px;font-size:12px;font-family:monospace;color:#ff6b35;display:none">
-          <div style="font-weight:700;margin-bottom:8px">🔍 DIAGNÓSTICO FIRESTORE</div>
-          <div id="debugContent">Cargando...</div>
-        </div>
-        <button onclick="runDiag()" style="width:100%;background:#1a1f1d;border:1px solid #ff6b35;color:#ff6b35;border-radius:8px;padding:8px;font-size:12px;margin-bottom:12px;cursor:pointer">
-          🔍 Ver diagnóstico Firestore
+        <button onclick="deleteAllFasts()" class="btn-danger-outline">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Eliminar todos los registros
         </button>
 
         <div id="histList"></div>
@@ -792,17 +793,6 @@ const cfgDoc = ()   => db.collection('users').doc(uid).collection('settings').do
 async function getFasts() {
   const s = await col('fasts').get();
   const all = s.docs.map(d => ({...d.data(), _id: d.id}));
-
-  // Debug: ver qué hay en Firestore
-  console.group(`[getFasts] uid=${uid} | total docs=${all.length}`);
-  all.forEach(d => console.log(
-    d._id,
-    '| endTime:', d.endTime ? d.endTime.substring(0,16) : '(none)',
-    '| lastMeal:', d.lastMeal ? d.lastMeal.substring(0,16) : '(none)',
-    '| hAct:', d.hAct
-  ));
-  console.groupEnd();
-
   return all.sort((a, b) => {
     const ta = a.endTime || a.lastMeal || '';
     const tb = b.endTime || b.lastMeal || '';
@@ -810,50 +800,11 @@ async function getFasts() {
   });
 }
 
-// Panel de diagnóstico visible en la UI
-window.runDiag = async () => {
-  const panel = document.getElementById('debugPanel');
-  const content = document.getElementById('debugContent');
-  panel.style.display = 'block';
-  content.textContent = 'Consultando Firestore...';
-  try {
-    const s = await col('fasts').get();
-    const docs = s.docs.map(d => ({...d.data(), _id: d.id}));
-    const sorted = docs.sort((a,b) => (b.endTime||'') > (a.endTime||'') ? 1 : -1);
-    const lines = [
-      `UID: ${uid}`,
-      `Total docs en Firestore: ${docs.length}`,
-      `Fuente: ${s.metadata.fromCache ? '⚠️ CACHÉ LOCAL' : '✅ Servidor'}`,
-      `─────────────────────`,
-      ...sorted.slice(0,20).map((d,i) =>
-        `${i+1}. ${(d.endTime||d.lastMeal||'?').substring(0,16)} | ${d.mealType||'?'} | ${d.hAct?.toFixed?.(1)||'?'}h`
-      )
-    ];
-    content.innerHTML = lines.join('<br>');
-  } catch(e) {
-    content.textContent = 'ERROR: ' + (e.code || e.message);
-  }
-};
-
-// Acceso desde consola del navegador para debug
-window.debugFasts = async () => {
-  const rows = await getFasts();
-  console.table(rows.map(r => ({
-    id: r._id,
-    endTime: r.endTime ? r.endTime.substring(0,16) : '',
-    lastMeal: r.lastMeal ? r.lastMeal.substring(0,16) : '',
-    mealType: r.mealType,
-    hAct: r.hAct,
-  })));
-  return rows;
-};
 async function addFast(d) {
-  console.log('[addFast] uid:', uid, '| endTime:', d.endTime, '| hAct:', d.hAct);
-  const ref = await col('fasts').add({
+  await col('fasts').add({
     ...d,
     savedAt: firebase.firestore.FieldValue.serverTimestamp(),
   });
-  console.log('[addFast] guardado OK, id:', ref.id);
 }
 async function delFast(id)  { await col('fasts').doc(id).delete(); }
 async function getWeights() { const s = await col('weights').orderBy('datetime','asc').get(); return s.docs.map(d => ({...d.data(), _id: d.id})); }
@@ -1041,12 +992,7 @@ const MEAL_META = {
 };
 
 async function registrarComida(tipo) {
-  console.log('[registrarComida] tipo:', tipo, '| uid:', uid, '| activeLastMeal:', activeLastMeal);
-  if (!activeLastMeal || !uid) {
-    console.warn('[registrarComida] ABORTADO — falta uid o activeLastMeal');
-    showToast('⚠️ Error: sesión inválida. Recarga la app.');
-    return;
-  }
+  if (!activeLastMeal || !uid) return;
   const meta = MEAL_META[tipo];
   const btn  = document.getElementById(meta.btnId);
   // Deshabilitar todos los botones de comida mientras guarda
@@ -1101,8 +1047,7 @@ async function registrarComida(tipo) {
     const tipoLabel = tipo === 'cena' ? 'Cena' : 'Almuerzo';
     showToast(`✓ ${tipoLabel} · ${hAct.toFixed(1)}h completadas · nuevo ayuno iniciado`);
   } catch(e) {
-    console.error('[registrarComida] ERROR al guardar:', e.code, e.message, e);
-    showToast(`❌ Error al guardar: ${e.code || e.message || 'desconocido'}`);
+    showToast('Error al guardar — verifica tu conexión');
   } finally {
     document.getElementById('breakfastBtn').disabled = false;
     document.getElementById('lunchBtn').disabled     = false;
@@ -1210,6 +1155,22 @@ async function deleteFastEntry(id) {
   catch(e) { showToast('Error al eliminar'); }
 }
 
+async function deleteAllFasts() {
+  const total = parseInt(document.getElementById('histCount').textContent) || 0;
+  if (!confirm(`¿Eliminar los ${total} registros de ayuno? Esta acción no se puede deshacer.`)) return;
+  try {
+    const s = await col('fasts').get();
+    if (s.empty) { showToast('No hay registros'); return; }
+    const batch = db.batch();
+    s.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+    showToast('Todos los registros eliminados');
+    renderHistory();
+  } catch(e) {
+    showToast('Error al eliminar: ' + (e.code || e.message));
+  }
+}
+
 /* ════════════════════════════════════════
    WEIGHT
 ════════════════════════════════════════ */
@@ -1254,10 +1215,18 @@ function linReg(xs, ys) {
 
 async function renderWeight() {
   try {
-    const raw = await getWeights();
+    const [raw, fasts] = await Promise.all([getWeights(), getFasts()]);
     const res = document.getElementById('weightResults');
     if (raw.length === 0) { res.classList.add('hidden'); return; }
     res.classList.remove('hidden');
+
+    // Mapa día → horas máx de ayuno (para sincronizar peso↔ayuno)
+    const fastByDay = {};
+    fasts.forEach(f => {
+      const day = (f.endTime || f.lastMeal || '').substring(0, 10);
+      if (!day || !f.hAct) return;
+      fastByDay[day] = Math.max(fastByDay[day] || 0, f.hAct);
+    });
 
     const weights = raw.map(d => d.weight);
     const last    = weights[weights.length-1];
@@ -1315,8 +1284,9 @@ async function renderWeight() {
     document.getElementById('wPred7Sub').textContent  = (d7  >= 0 ? '+' : '') + d7.toFixed(3)  + ' kg vs hoy';
     document.getElementById('wPred30Sub').textContent = (d30 >= 0 ? '+' : '') + d30.toFixed(3) + ' kg vs hoy';
 
-    const labels = raw.map(d => fmtDateShort(d.datetime));
-    const ctx    = document.getElementById('weightChart').getContext('2d');
+    const labels   = raw.map(d => fmtDateShort(d.datetime));
+    const fastHours = raw.map(d => fastByDay[d.datetime.substring(0,10)] ?? null);
+    const ctx      = document.getElementById('weightChart').getContext('2d');
     if (wChart) wChart.destroy();
 
     wChart = new Chart(ctx, {
@@ -1324,12 +1294,29 @@ async function renderWeight() {
       data: {
         labels,
         datasets: [
-          { data:weights, borderColor:'#a3e635', backgroundColor:'rgba(163,230,53,0.07)', fill:true, tension:0.35,
-            pointBackgroundColor:'#a3e635', pointBorderColor:'#0d0f0e', pointBorderWidth:2, pointRadius:5, pointHoverRadius:7, borderWidth:2, order:1 },
-          { data:Array(weights.length).fill(mean), borderColor:'rgba(255,255,255,0.10)',
-            borderWidth:1, borderDash:[4,4], pointRadius:0, fill:false, tension:0, order:3 },
-          { data:xs.map(x => parseFloat((intercept + slope*x).toFixed(2))), borderColor:'rgba(45,212,191,0.55)',
-            borderWidth:1.5, borderDash:[6,3], pointRadius:0, fill:false, tension:0, order:2 },
+          { // Horas de ayuno — barras traseras en eje derecho
+            type: 'bar',
+            data: fastHours,
+            backgroundColor: 'rgba(45,212,191,0.15)',
+            borderColor: 'rgba(45,212,191,0.35)',
+            borderWidth: 1,
+            borderRadius: 3,
+            yAxisID: 'yFast',
+            order: 4,
+            label: 'Ayuno (h)',
+          },
+          { // Peso real
+            data: weights, borderColor:'#a3e635', backgroundColor:'rgba(163,230,53,0.07)', fill:true, tension:0.35,
+            pointBackgroundColor:'#a3e635', pointBorderColor:'#0d0f0e', pointBorderWidth:2, pointRadius:5, pointHoverRadius:7, borderWidth:2, order:1, yAxisID:'y', label:'Peso',
+          },
+          { // Media
+            data: Array(weights.length).fill(mean), borderColor:'rgba(255,255,255,0.10)',
+            borderWidth:1, borderDash:[4,4], pointRadius:0, fill:false, tension:0, order:3, yAxisID:'y',
+          },
+          { // Tendencia lineal
+            data: xs.map(x => parseFloat((intercept + slope*x).toFixed(2))), borderColor:'rgba(45,212,191,0.55)',
+            borderWidth:1.5, borderDash:[6,3], pointRadius:0, fill:false, tension:0, order:2, yAxisID:'y',
+          },
         ],
       },
       options: {
@@ -1337,26 +1324,43 @@ async function renderWeight() {
         interaction:{mode:'index',intersect:false},
         plugins: {
           legend:{display:false},
-          tooltip:{ backgroundColor:'#191c19', borderColor:'rgba(255,255,255,0.11)', borderWidth:1,
+          tooltip:{
+            backgroundColor:'#191c19', borderColor:'rgba(255,255,255,0.11)', borderWidth:1,
             titleColor:'#6b7d6d', titleFont:{family:"'DM Mono',monospace",size:11},
             bodyColor:'#e8ede9', bodyFont:{family:"'DM Mono',monospace",size:13}, padding:10,
-            filter: item => item.datasetIndex === 0,
-            callbacks:{ label: ctx => `  ${ctx.parsed.y.toFixed(3)} kg` } },
+            callbacks:{
+              label: item => {
+                if (item.datasetIndex === 0 && item.parsed.y != null) return `  ⏱ Ayuno: ${item.parsed.y.toFixed(1)}h`;
+                if (item.datasetIndex === 1) return `  ⚖ Peso: ${item.parsed.y.toFixed(3)} kg`;
+                return null;
+              },
+              filter: item => item.datasetIndex <= 1 && item.parsed.y != null,
+            },
+          },
         },
         scales: {
           x:{ grid:{color:'rgba(255,255,255,0.04)'}, border:{display:false}, ticks:{color:'#6b7d6d',font:{family:"'DM Mono',monospace",size:10},maxRotation:30} },
-          y:{ grid:{color:'rgba(255,255,255,0.04)'}, border:{display:false}, ticks:{color:'#6b7d6d',font:{family:"'DM Mono',monospace",size:10},callback:v=>v+' kg'} },
+          y:{ grid:{color:'rgba(255,255,255,0.04)'}, border:{display:false}, ticks:{color:'#6b7d6d',font:{family:"'DM Mono',monospace",size:10},callback:v=>v+' kg'}, position:'left' },
+          yFast:{ display:true, position:'right', grid:{drawOnChartArea:false}, border:{display:false},
+            ticks:{color:'rgba(45,212,191,0.5)',font:{family:"'DM Mono',monospace",size:9},callback:v=>v+'h'},
+            min:0,
+          },
         },
       },
     });
 
     const wd = raw.map((d,i) => ({...d, delta: i>0 ? d.weight-raw[i-1].weight : null}));
     document.getElementById('weightList').innerHTML = [...wd].reverse().map(d => {
-      const ds  = d.delta!=null ? (d.delta>=0?'+':'')+d.delta.toFixed(3)+' kg' : '—';
-      const cls = d.delta==null?'delta-neu':d.delta<0?'delta-neg':d.delta>0?'delta-pos':'delta-neu';
+      const ds   = d.delta!=null ? (d.delta>=0?'+':'')+d.delta.toFixed(3)+' kg' : '—';
+      const cls  = d.delta==null?'delta-neu':d.delta<0?'delta-neg':d.delta>0?'delta-pos':'delta-neu';
+      const day  = d.datetime.substring(0, 10);
+      const fh   = fastByDay[day];
+      const fastTag = fh != null
+        ? `<span class="w-entry-fast">⏱ ${fh.toFixed(1)}h ayuno</span>`
+        : '';
       return `<div class="w-entry">
         <div class="w-entry-val">${d.weight.toFixed(3)} kg</div>
-        <div class="w-entry-date">${fmtDate(d.datetime)}${d.note?` · <em style="opacity:0.5">${d.note}</em>`:''}</div>
+        <div class="w-entry-date">${fmtDate(d.datetime)}${d.note?` · <em style="opacity:0.5">${d.note}</em>`:''} ${fastTag}</div>
         <div class="w-entry-delta ${cls}">${ds}</div>
         <button class="btn-ghost" onclick="deleteWeightEntry('${d._id}')">${ICONS.xMark}</button>
       </div>`;
