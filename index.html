@@ -781,24 +781,21 @@ const col    = name => db.collection('users').doc(uid).collection(name);
 const cfgDoc = ()   => db.collection('users').doc(uid).collection('settings').doc('currentFast');
 
 async function getFasts() {
-  // Ordena por endTime (ISO string del cliente, siempre disponible).
-  // savedAt usa serverTimestamp() que puede quedar "pending" y excluir docs del query.
-  try {
-    const s = await col('fasts').orderBy('endTime','desc').get();
-    return s.docs.map(d => ({...d.data(), _id: d.id}));
-  } catch(e) {
-    // Fallback: sin orden (carga todos y ordena en cliente)
-    const s = await col('fasts').get();
-    return s.docs
-      .map(d => ({...d.data(), _id: d.id}))
-      .sort((a,b) => (b.endTime||'') > (a.endTime||'') ? 1 : -1);
-  }
+  // Sin orderBy: Firestore devuelve TODOS los documentos sin excluir ninguno.
+  // El orden se hace en el cliente con el campo endTime (ISO string siempre presente).
+  const s = await col('fasts').get();
+  return s.docs
+    .map(d => ({...d.data(), _id: d.id}))
+    .sort((a, b) => {
+      const ta = a.endTime || a.lastMeal || '';
+      const tb = b.endTime || b.lastMeal || '';
+      return tb > ta ? 1 : -1;
+    });
 }
 async function addFast(d) {
   await col('fasts').add({
     ...d,
-    savedAt:  firebase.firestore.FieldValue.serverTimestamp(), // para auditoría
-    clientAt: d.endTime,  // copia ISO string — usado para ordenar de forma confiable
+    savedAt: firebase.firestore.FieldValue.serverTimestamp(),
   });
 }
 async function delFast(id)  { await col('fasts').doc(id).delete(); }
